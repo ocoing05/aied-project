@@ -6,6 +6,10 @@ class WikiHelper:
         self.S = requests.Session()
         self.URL = "https://en.wikipedia.org/w/api.php"
 
+    # Returns url to Wikipedia page
+    def getURL(self, title):
+        return "https://en.wikipedia.org/wiki/" + title
+
     # Returns list of titles of all links from the given page
     def getLinkedPages(self, title):
         params = {
@@ -39,10 +43,12 @@ class WikiHelper:
 
         return linkedPages
 
-# example call
+# examples
 wh = WikiHelper()
 pages = wh.getLinkedPages("Aristotle")
 print(pages)
+
+print(wh.getURL(pages[0]))
 
 # NOTES : 
 # i feel like there is a way to be neater about the code above ? but for now it works
