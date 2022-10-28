@@ -1,5 +1,5 @@
 """
-Represents a node in the graph of Wikipedia.
+Represents a node in the graph of Wikipedia articles.
 Includes title, url, summary, categories, linked pages, and content of page.
 Uses NLP on content to determine key words, which are used by recommender system.
 """
@@ -17,9 +17,7 @@ class WikiNode:
         self.linkedPages = page.links
         self.content = page.content
 
-        # use NLP to return list of most important words/topics ?
-        # to be used by recommender for identifying interests 
-        # and choosing most relevant next article to choose
+        # TODO: use NLP to return list of most important words/topics ???
         self.keyWords = []
 
     # do we need getter functions or can we access the variables directly ??
