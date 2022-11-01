@@ -4,7 +4,6 @@ class ProgressGraph:
     def __init__(self) -> None:
 
         self.opened = {} # a dictionary of all the WikiNodes opened at least once by the Student
-        # self.fringe = priority queue of unopened WikiNodes adjacent to opened nodes, prioritized by likely student interest
 
     def update(self, wikiNode) -> None:
 
