@@ -14,7 +14,7 @@ class StudentModel:
             self.interestKeywords[interest] = 1
 
         self.progressGraph = ProgressGraph()
-        self.fringeQueue = {} # Priority Queue of unopened WikiNodes adjacent to progressGraph, sorted by potential interest
+        self.Fringe = {} # Priority Queue of unopened WikiNodes adjacent to progressGraph, sorted by potential interest
         self.newWords = [] # List of words identified by the student as unknown/that they are unsure of the meaning
 
     def getStudentName(self) -> str:
@@ -25,9 +25,20 @@ class StudentModel:
 
         return self.interestKeywords.keys()
 
+    def updateModel(self) -> None:
+
+        self.updateInterestKeywords
+        self.updateFringeQueue
+        self.updateProgressGraph
+
+
+    def updateInterestKeywords(self) -> None:
+        
+        pass
+
     def updateFringe(self) -> None:
         
-        for key in self.fringeQueue:
+        for key in self.Fringe:
             words = key.getKeywords()
             interestCounter = 0
             for word in words:
