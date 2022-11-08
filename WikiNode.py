@@ -8,7 +8,7 @@ import wikipedia
 import yake
 
 class WikiNode:
-    def __init__(self, title, prevNode):
+    def __init__(self, title, prevNode = None):
         self.title = title
 
         self.page = wikipedia.page(self.title)
@@ -35,16 +35,33 @@ class WikiNode:
 
     def getKeyWords(self):
         text = self.getContent()
-        # use NLP to get key words for the article which can be used by recommender
         language = "en"
         max_ngram_size = 2
         deduplication_threshold = 0.9 # set to 0.1 to prohibit repeated words in key words
-        numOfKeywords = 20
+        numOfKeywords = 50
         extractor = yake.KeywordExtractor(
             lan=language, 
             n=max_ngram_size, 
             dedupLim=deduplication_threshold, 
             top=numOfKeywords, 
             features=None)
+        tuples = extractor.extract_keywords(text)
+        keywords = [i[0] for i in tuples]
 
-        return extractor.extract_keywords(text)
+        return keywords
+
+# graph? : https://networkx.org/documentation/stable/tutorial.html
+
+# TESTING / EXAMPLES
+
+test = WikiNode("Dinosaurs")
+
+print("LINKS")
+print(test.linkedPages)
+
+print("KEYWORDS")
+keywords = test.getKeyWords()
+print(keywords)
+
+print("BOTH LINK AND KEYWORD")
+print(set(test.linkedPages) & set(keywords))
