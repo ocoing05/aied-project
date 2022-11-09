@@ -33,6 +33,9 @@ class WikiNode:
     def getSummary(self, sentences):
         self.summary = wikipedia.summary(self.title, sentences)
 
+    def getSectionTitles(self):
+        return self.page.sections
+
     def getKeyWords(self):
         text = self.getContent()
         language = "en"
@@ -56,12 +59,15 @@ class WikiNode:
 
 test = WikiNode("Dinosaurs")
 
-print("LINKS")
-print(test.linkedPages)
+# print("LINKS")
+# print(test.linkedPages)
 
-print("KEYWORDS")
-keywords = test.getKeyWords()
-print(keywords)
+# print("KEYWORDS")
+# keywords = test.getKeyWords()
+# print(keywords)
 
-print("BOTH LINK AND KEYWORD")
-print(set(test.linkedPages) & set(keywords))
+# print("BOTH LINK AND KEYWORD")
+# print(set(test.linkedPages) & set(keywords))
+
+print("SECTION TITLES")
+print(test.getSectionTitles())

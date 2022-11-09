@@ -3,6 +3,7 @@ import Recommender
 import StudentConstructor
 import StudentModel
 import WikiNode
+import SessionTracker
 
 class UserInterface:
 
@@ -10,6 +11,7 @@ class UserInterface:
 
         self.currStudent = None
         self.recommender = Recommender()
+        self.sessionTracker = SessionTracker()
         self.finished = False # is set to True if the student logs out
         pass
 

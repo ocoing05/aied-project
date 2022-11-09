@@ -14,8 +14,11 @@ class StudentModel:
             self.interestKeywords[interest] = 1
 
         self.progressGraph = ProgressGraph()
-        self.Fringe = {} # Priority Queue of unopened WikiNodes adjacent to progressGraph, sorted by potential interest
-        self.newWords = [] # List of words identified by the student as unknown/that they are unsure of the meaning
+        self.fringe = {} # Priority Queue of unopened WikiNodes adjacent to progressGraph, sorted by potential interest
+        self.newWords = [] # List of words identified by the student as unknown, or that they are unsure of the meaning
+        currentSession = None 
+        statsBySession = [] # List of sessionStats objects, helps build progress reports for students and teachers
+
 
     def getStudentName(self) -> str:
 
@@ -28,8 +31,8 @@ class StudentModel:
     def updateModel(self) -> None:
 
         self.updateInterestKeywords
-        self.updateFringeQueue
-        self.updateProgressGraph
+        self.updateFringe
+        self.updateProgress
 
 
     def updateInterestKeywords(self) -> None:
@@ -47,7 +50,7 @@ class StudentModel:
                 pass
 
             potentialInterest = interestCounter / len(words)
-            self.fringeQueue[key] = potentialInterest
+            self.fringe[key] = potentialInterest
 
 
 
