@@ -1,4 +1,4 @@
-import ProgressGraph
+from ProgressGraph import ProgressGraph
 
 class StudentModel:
 
@@ -52,6 +52,7 @@ class StudentModel:
             potentialInterest = interestCounter / len(words)
             self.fringe[key] = potentialInterest
 
-
+    def updateGraph(self, article):
+        self.progressGraph.updateGraph(article)
 
 

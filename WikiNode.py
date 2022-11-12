@@ -4,6 +4,8 @@ Includes title, url, summary, categories, linked pages, and content of page.
 Uses NLP on content to determine key words, which are used by recommender system.
 """
 
+# pip3 install wikipedia_sections
+
 import wikipedia
 import yake
 
@@ -30,6 +32,7 @@ class WikiNode:
     def getContent(self):
         return self.page.content
 
+    # returns opening sentences of article, before the sections begin
     def getSummary(self, sentences):
         self.summary = wikipedia.summary(self.title, sentences)
 
@@ -52,12 +55,20 @@ class WikiNode:
         keywords = [i[0] for i in tuples]
 
         return keywords
-
-# graph? : https://networkx.org/documentation/stable/tutorial.html
+    
+    # returns dictionary containing contents of each section... api ot working right rn
+    # def getSectionsContents(self):
+    #     sectionContents = {}
+    #     for section in self.page.sections:
+    #         content = self.page.section(section)
+    #         if len(content) > 0: # non-empty section
+    #             sectionContents[section] = self.page.section(section)
+    #     return sectionContents
 
 # TESTING / EXAMPLES
 
-test = WikiNode("Dinosaurs")
+# test = WikiNode("Dinosaurs")
+# print(test.getSummary(4))
 
 # print("LINKS")
 # print(test.linkedPages)
@@ -69,5 +80,5 @@ test = WikiNode("Dinosaurs")
 # print("BOTH LINK AND KEYWORD")
 # print(set(test.linkedPages) & set(keywords))
 
-print("SECTION TITLES")
-print(test.getSectionTitles())
+# print("SECTION TITLES")
+# print(test.getSectionTitles())

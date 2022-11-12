@@ -2,6 +2,8 @@ import StudentModel
 import WikiNode
 
 class Recommender:
+    # how does this work? wouldn't this sort of be used within student model to determine the ordering of fringe?
+    # like a student model would use this class as a helper to create the fringe ?
     
     def __init__(self) -> None:
         
