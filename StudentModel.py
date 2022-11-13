@@ -15,6 +15,8 @@ class StudentModel:
 
         self.progressGraph = ProgressGraph()
         self.fringe = {} # Priority Queue of unopened WikiNodes adjacent to progressGraph, sorted by potential interest
+        # TODO: add initial interestKeywords as WikiNode objects to the fringe if they exist as wiki articles
+
         self.newWords = [] # List of words identified by the student as unknown, or that they are unsure of the meaning
         currentSession = None 
         statsBySession = [] # List of sessionStats objects, helps build progress reports for students and teachers

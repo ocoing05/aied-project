@@ -13,6 +13,7 @@ def runFreeLearnerMVP():
     print('This list should be separated by commas, like this: Dinosaurs,Science,Disney')
     interestStr = input('What are your interests? \n')
     student = StudentModel(name, '', '', '', createInterestList(interestStr))
+    
 
 # takes in a string of interests separated by commas and creates an interest list
 def createInterestList(str):
