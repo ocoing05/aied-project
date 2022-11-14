@@ -1,5 +1,5 @@
 import StudentModel
-import WikiNode
+import DomainModeling
 
 class Recommender:
     # how does this work? wouldn't this sort of be used within student model to determine the ordering of fringe?
@@ -16,11 +16,19 @@ class Recommender:
 
 
     def getRecommendations(self) -> list:
-        
-        return self.recommendations.keys()
+
+        if (self.studentModel == None):
+            # error: no studentModel loaded
+            return []
+        else:
+            return self.recommendations.keys()
 
     def generateNewRecommendations(self) -> None:
-
-        # self.studentModel.getFringe
         
-        pass
+        if (self.studentModel == None):
+            # error: no studentModel loaded
+            pass
+        else:
+            
+            # self.studentModel.getFringe
+            pass

@@ -2,8 +2,12 @@
 import Recommender
 import StudentConstructor
 import StudentModel
-import WikiNode
+import DomainModeling
 import SessionTracker
+
+import networkx as nx
+import matplotlib.pyplot as plt
+import time
 
 class UserInterface:
 
@@ -13,7 +17,9 @@ class UserInterface:
         self.recommender = Recommender()
         self.sessionTracker = SessionTracker()
         self.finished = False # is set to True if the student logs out
-        pass
+        self.startTime = 0 # for tracking usage
+        self.endTime = 0 # for tracking usage
+        self.currentNode = None
 
     def run(self) -> None:
 
@@ -25,7 +31,9 @@ class UserInterface:
             # self.getStudentFromDatabase() --> calls progressReport()
 
         while not self.finished:
-            pass
+            recs = self.recommender.getRecommendations()
+            self.currentNode = self.nodeSelection(recs)
+            pass 
         pass
 
     def makeNewStudent(self) -> None:
@@ -63,7 +71,21 @@ class UserInterface:
     def progressReport(self) -> None:
         """The progressReport function gives a visual representation of the progressGraph, 
         short textual representation of the last three WikiNodes visited, """
+        G = nx.Graph()
+        G.add_edges_from(self.visual)
+        nx.draw_networkx(G)
+        plt.show()
         pass
+
+    def nodeSelection(self, recs) -> None:
+        # gui.display(recs)
+        # 
+        pass
+    
+    def setCurrentNode(self) -> None:
+
+        self.startTime = time.time()
+
 
 if __name__ == "__main__":
     UI = UserInterface()

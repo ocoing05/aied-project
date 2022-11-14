@@ -9,9 +9,16 @@ class StudentModel:
         self.password = password # protecting account usage
         self.email = email # for resetting password
 
-        self.interestKeywords = {} # dictionary of interest keywords, and a value between -1.0 and 1.0 
+        self.interestKeywords = {}  # dictionary of interest keywords, and a tuple:
+                                    # first value: times updated
+                                    # second value: level of interest, between -1.0 and 1.0
+                                    #
+                                    # Level of interest is determined by:
+                                    #   1. Summing values all values inputed for the specific keyword
+                                    #   2. Dividing summed value by number of times updated
+
         for interest in interestKeywords:
-            self.interestKeywords[interest] = 1
+            self.interestKeywords[interest] = (1, 1) # initializing all interests retrieved from survey
 
         self.progressGraph = ProgressGraph()
         self.fringe = {} # Priority Queue of unopened WikiNodes adjacent to progressGraph, sorted by potential interest
@@ -26,20 +33,29 @@ class StudentModel:
 
         return self.studentName
 
-    def getInterestKeywords(self) -> dict:
+    def getInterestKeywords(self) -> set:
 
         return self.interestKeywords.keys()
 
     def updateModel(self) -> None:
 
-        self.updateInterestKeywords
+        self.updateInterestKeyword
         self.updateFringe
         self.updateProgress
 
+    def updateInterestKeyword(self, keyword, newInterestValue) -> None:
+        """This function is called when a new interest value is retrieved from the SessionTracker,
+        regardless of if the keyword already exists in the self.interestKeywords dictionary."""
 
-    def updateInterestKeywords(self) -> None:
-        
-        pass
+        if not self.getInterestKeywords().contains(keyword):
+            self.interestKeywords[keyword] = (1, newInterestValue)
+
+        else:
+            (timesUpdated, interestLevel) = self.interestKeywords[keyword]
+
+            newTimesUpdated = timesUpdated + 1
+            newInterestLevel = (interestLevel + newInterestValue)/newTimesUpdated 
+            self.interestKeywords[keyword] = (newTimesUpdated, newInterestLevel)
 
     def updateFringe(self) -> None:
         
@@ -54,7 +70,14 @@ class StudentModel:
             potentialInterest = interestCounter / len(words)
             self.fringe[key] = potentialInterest
 
+<<<<<<< Updated upstream
     def updateGraph(self, article):
         self.progressGraph.updateGraph(article)
+=======
+    def updateProgress(self) -> None:
+
+        pass
+
+>>>>>>> Stashed changes
 
 
