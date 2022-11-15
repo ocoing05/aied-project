@@ -6,6 +6,7 @@ Uses NLP on content to determine key words, which are used by recommender system
 
 import wikipedia
 import yake
+import networkx as nx
 from FoxQueue import PriorityQueue
 
 from owlready2 import *
@@ -47,6 +48,20 @@ class KnowledgeGraph:
         self.visited[wikiNode] = []
 
         pass
+
+    # called after a student reads a new article
+    def updateGraph(self, node): # is this what update is supposed to be?
+        if not self.graph: # is the student does not have a graph yet/hasn't read any articles yet
+            self.graph = nx.Graph()
+        # update explored graph
+        self.graph.add_node(node.title)
+        if node.prevNode:
+            self.graph.add_edge(node.title, node.prevNode)
+        # update fringe queue
+        # something like the lines below, but ranked based on interests / NLP / key words ?
+        # for pg in node.linkedPages:
+            # studentFringe.add(WikiNode(pg, node.title)) # should add the node object to keep track of parent node, not just the title
+        # update student interests ?
 
 class WikiNode:
 
