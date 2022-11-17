@@ -6,8 +6,6 @@ Uses NLP on content to determine key words, which are used by recommender system
 
 import wikipedia
 import yake
-import spacy
-from sense2vec import Sense2Vec
 import networkx as nx
 from FoxQueue import PriorityQueue
 from WikiNode import WikiNode
@@ -63,7 +61,7 @@ class KnowledgeGraph:
         # something like the lines below, but ranked based on interests / NLP / key words ?
         # for pg in node.linkedPages:
             # studentFringe.add(WikiNode(pg, node.title)) # should add the node object to keep track of parent node, not just the title
-        # TODO: update student interests
+        # TODO: update student interests in student model
 
 if __name__ == "__main__":
 
