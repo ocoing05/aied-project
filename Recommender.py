@@ -2,8 +2,6 @@ import StudentModel
 import DomainModeling
 
 class Recommender:
-    # how does this work? wouldn't this sort of be used within student model to determine the ordering of fringe?
-    # like a student model would use this class as a helper to create the fringe ?
     
     def __init__(self) -> None:
         
@@ -32,3 +30,14 @@ class Recommender:
             
             # self.studentModel.getFringe
             pass
+
+# Notes:
+
+# student model fringe queue sorted only based on interests
+# then goes in here to be also sorted by whatever aspect we choose to prioritize
+# the domain model wiki noncyclic graph could also be input in here 
+# going higher into hierarchy vs lower vs somewhere altogether different domain
+
+# compare student progress graph with ontology graph to see which are explored
+# maybe just get the top n in the student's queue to go into Recommender
+# take articles from student queue and sort those into categories based on domains in ontology model

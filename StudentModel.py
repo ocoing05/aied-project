@@ -70,14 +70,6 @@ class StudentModel:
             potentialInterest = interestCounter / len(words)
             self.fringe[key] = potentialInterest
 
-<<<<<<< Updated upstream
     def updateGraph(self, article):
         self.progressGraph.updateGraph(article)
-=======
-    def updateProgress(self) -> None:
-
-        pass
-
->>>>>>> Stashed changes
-
 

@@ -8,7 +8,9 @@ import wikipedia
 import yake
 import spacy
 from sense2vec import Sense2Vec
+import networkx as nx
 from FoxQueue import PriorityQueue
+from WikiNode import WikiNode
 
 # from owlready2 import *
 
@@ -50,92 +52,26 @@ class KnowledgeGraph:
 
         pass
 
-class WikiNode:
-
-    def __init__(self, title, prevNode = None, visited=False):
-
-        self.elapsedTime = 0
-        self.erodedTime = 0
-        self.numVisits = 0
-        self.numSectionTests = 0
-
-        self.title = title
-
-        self.visited  = visited 
-
-        self.page = wikipedia.page(self.title, auto_suggest=False)
-        # these would be like children in the tree
-        self.linkedPages = self.page.links
-
-        # parent in the tree ? ... the article they read to get this suggestion
-        # not sure if this is needed
-        self.prevNode = prevNode
-        self.parentNode = self._getParent()
-        self.siblings = [] # 
-        self.peers = [] # 
-
-        self.keyWords = self.getKeyWords()
-
-    def getURL(self):
-        return "https://en.wikipedia.org/wiki/" + self.title
-
-    def getCategories(self):
-        return self.page.categories
-
-    def _getParent(self):
-        """Queries the wikiNode title in the noncyclic Wikipedia knowledge graph,
-        and returns the one node that is the parent of this wikiNode."""
-        pass
-
-    def getContent(self):
-        return self.page.content
-
-    def getSummary(self, sentences):
-        self.summary = wikipedia.summary(self.title, sentences)
-
-    def getSectionTitles(self):
-        return self.page.sections
-
-    def getKeyWords(self):
-        text = self.getContent()
-        language = "en"
-        max_ngram_size = 2
-        deduplication_threshold = 0.9 # set to 0.1 to prohibit repeated words in key words
-        numOfKeywords = 100
-        extractor = yake.KeywordExtractor(
-            lan=language, 
-            n=max_ngram_size, 
-            dedupLim=deduplication_threshold, 
-            top=numOfKeywords, 
-            features=None)
-        tuples = extractor.extract_keywords(text)
-        keywords = [i[0] for i in tuples]
-
-        return keywords
-
-    def setAsVisited(self) -> None:
-        self.numVisits = 1
-        self.visited = True
-
-    def isVisited(self) -> bool:
-        
-        return self.visited
-
-    def updateStats(statDict) -> None:
-
-        
-        pass
-
+    # called after a student reads a new article
+    def updateGraph(self, node): # is this what update is supposed to be?
+        if not self.graph: # is the student does not have a graph yet/hasn't read any articles yet
+            self.graph = nx.Graph()
+        self.graph.add_node(node.title)
+        if node.prevNode:
+            self.graph.add_edge(node.title, node.prevNode)
+        # TODO: update fringe queue
+        # something like the lines below, but ranked based on interests / NLP / key words ?
+        # for pg in node.linkedPages:
+            # studentFringe.add(WikiNode(pg, node.title)) # should add the node object to keep track of parent node, not just the title
+        # TODO: update student interests
 
 if __name__ == "__main__":
 
-    # graph? : https://networkx.org/documentation/stable/tutorial.html
-
-    # onto = get_ontology("file:///Users/quentinharrington/Desktop/COMP484/aied-project/wiki_cats_full_non_cyclic_v1.owl")
-    # onto.load()
-    # ontoList = list(onto.classes())
-    # print(ontoList)
-
+    onto = get_ontology("file:///Users/quentinharrington/Desktop/COMP484/aied-project/wiki_cats_full_non_cyclic_v1.owl")
+    onto.load()
+    ontoList = list(onto.classes())
+    print(ontoList)
+    
     # TESTING / EXAMPLES
 
     nlp = spacy.load('en_core_web_lg')
