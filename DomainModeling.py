@@ -57,11 +57,11 @@ class KnowledgeGraph:
         self.graph.add_node(node.title)
         if node.prevNode:
             self.graph.add_edge(node.title, node.prevNode)
-        # update fringe queue...
+        # TODO: update fringe queue
         # something like the lines below, but ranked based on interests / NLP / key words ?
         # for pg in node.linkedPages:
             # studentFringe.add(WikiNode(pg, node.title)) # should add the node object to keep track of parent node, not just the title
-        # update student interests ?
+        # TODO: update student interests
 
 if __name__ == "__main__":
 
