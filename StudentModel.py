@@ -73,4 +73,3 @@ class StudentModel:
     def updateGraph(self, article):
         self.progressGraph.updateGraph(article)
 
-
