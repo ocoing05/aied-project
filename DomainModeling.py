@@ -6,9 +6,11 @@ Uses NLP on content to determine key words, which are used by recommender system
 
 import wikipedia
 import yake
+import spacy
+from sense2vec import Sense2Vec
 from FoxQueue import PriorityQueue
 
-from owlready2 import *
+# from owlready2 import *
 
 class KnowledgeGraph:
 
@@ -61,14 +63,14 @@ class WikiNode:
 
         self.visited  = visited 
 
-        self.page = wikipedia.page(self.title)
+        self.page = wikipedia.page(self.title, auto_suggest=False)
         # these would be like children in the tree
         self.linkedPages = self.page.links
 
         # parent in the tree ? ... the article they read to get this suggestion
         # not sure if this is needed
         self.prevNode = prevNode
-        self.parentNode = self.getParent()
+        self.parentNode = self._getParent()
         self.siblings = [] # 
         self.peers = [] # 
 
@@ -129,24 +131,34 @@ if __name__ == "__main__":
 
     # graph? : https://networkx.org/documentation/stable/tutorial.html
 
-    onto = get_ontology("file:///Users/quentinharrington/Desktop/COMP484/aied-project/wiki_cats_full_non_cyclic_v1.owl")
-    onto.load()
-    ontoList = list(onto.classes())
-    print(ontoList)
+    # onto = get_ontology("file:///Users/quentinharrington/Desktop/COMP484/aied-project/wiki_cats_full_non_cyclic_v1.owl")
+    # onto.load()
+    # ontoList = list(onto.classes())
+    # print(ontoList)
 
     # TESTING / EXAMPLES
 
-    test = WikiNode("Dinosaurs")
+    nlp = spacy.load('en_core_web_lg')
+    s2v = nlp.add_pipe("sense2vec")
+    s2v.from_disk("/path/to/s2v_reddit_2015_md")
 
-    print("LINKS")
-    print(test.linkedPages)
 
-    print("KEYWORDS")
-    keywords = test.getKeyWords()
-    print(keywords)
+    doc1 = nlp("Alien")
+    doc2 = nlp("Extraterrestrial")
 
-    print("BOTH LINK AND KEYWORD")
-    print(set(test.linkedPages) & set(keywords))
+    print(doc1.similarity(doc2))
 
-    print("SECTION TITLES")
-    print(test.getSectionTitles())
+    # test = WikiNode("Aliens")
+
+    # print("LINKS")
+    # print(test.linkedPages)
+
+    # print("KEYWORDS")
+    # keywords = test.getKeyWords()
+    # print(keywords)
+
+    # print("BOTH LINK AND KEYWORD")
+    # print(set(test.linkedPages) & set(keywords))
+
+    # print("SECTION TITLES")
+    # print(test.getSectionTitles())
