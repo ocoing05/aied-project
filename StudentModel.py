@@ -1,5 +1,8 @@
 from ProgressGraph import ProgressGraph
 
+import spacy
+from sense2vec import Sense2Vec
+
 class StudentModel:
 
     def __init__(self, studentName, username, password, email, interestKeywords) -> None:
