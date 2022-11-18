@@ -17,6 +17,7 @@ class WikiNode:
         self.title = title
 
         self.wikipedia = MediaWiki()
+        self.wikipedia.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone' # MediaWiki ettiquete i
 
         self.page = self.wikipedia.page(self.title)
         # these would be like children in the tree
