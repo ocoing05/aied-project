@@ -1,4 +1,4 @@
-from ProgressGraph import ProgressGraph
+import ProgressGraph
 
 import spacy
 from sense2vec import Sense2Vec
@@ -62,7 +62,7 @@ class StudentModel:
 
     def updateFringe(self) -> None:
         
-        for key in self.Fringe:
+        for key in self.fringe:
             words = key.getKeywords()
             interestCounter = 0
             for word in words:
