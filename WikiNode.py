@@ -28,6 +28,13 @@ class WikiNode:
 
         self.keyWords = self.getKeyWords()
 
+        # dictionary containing contents of each section
+        self.sectionContents = {}
+        for section in self.page.sections:
+            content = self.page.section(section)
+            if len(content) > 0: # non-empty section
+                self.sectionContents[section] = content
+
     def getURL(self):
         return "https://en.wikipedia.org/wiki/" + self.title
 
@@ -61,14 +68,12 @@ class WikiNode:
 
         return keywords
     
-    # returns dictionary containing contents of each section... api ot working right rn
-    # def getSectionsContents(self):
-    #     sectionContents = {}
-    #     for section in self.page.sections:
-    #         content = self.page.section(section)
-    #         if len(content) > 0: # non-empty section
-    #             sectionContents[section] = self.page.section(section)
-    #     return sectionContents
+    def getSectionContents(self, section):
+
+        if section not in self.sectionContents:
+            return ("No section titled ", section)
+        else:
+            return self.sectionContents[section]
 
 if __name__ == "__main__":
 
@@ -89,3 +94,6 @@ if __name__ == "__main__":
 
     print("SECTION TITLES")
     print(test.getSectionTitles())
+
+    print("CONTENTS OF SECTION TITLED: '", test.getSectionTitles()[0], "'")
+    print(test.getSectionContents(test.getSectionTitles()[0]))
