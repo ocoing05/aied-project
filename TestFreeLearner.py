@@ -1,5 +1,5 @@
-from StudentModel import StudentModel
-from WikiNode import WikiNode
+from studentmodel import StudentModel
+from wikinode import WikiNode
 
 # *** MOCK DATA ***
 

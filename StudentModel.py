@@ -1,4 +1,4 @@
-import ProgressGraph
+from progressgraph import ProgressGraph
 
 import spacy
 from sense2vec import Sense2Vec

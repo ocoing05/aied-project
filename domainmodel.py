@@ -1,19 +1,17 @@
-"""
-Represents a node in the graph of Wikipedia articles.
-Includes title, url, summary, categories, linked pages, and content of page.
-Uses NLP on content to determine key words, which are used by recommender system.
-"""
 
-import wikipedia
+
 import yake
 import networkx as nx
 from FoxQueue import PriorityQueue
-import WikiNode
+from wikinode import WikiNode
 from mediawiki import MediaWiki
 
 # from owlready2 import *
 
-
+class DomainModel:
+    
+    def __init__(self) -> None:
+        pass
 
 if __name__ == "__main__":
 

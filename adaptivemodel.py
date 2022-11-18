@@ -1,7 +1,13 @@
-import StudentModel
-import DomainModeling
-import spacy
+"""Adaptive Model generates adaptive recommendations by utilizing a 
+    1. Student Model
+    2. Domain Model
+    3. Session Tracker"""
+
+
+from studentmodel import StudentModel
+from domainmodel import DomainModel
 from sense2vec import Sense2Vec
+import spacy
 
 class AdaptiveModel:
     

@@ -1,4 +1,4 @@
-import StudentModel
+from studentmodel import StudentModel
 
 class StudentConstructor:
 

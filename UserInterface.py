@@ -1,8 +1,8 @@
 
-import Recommender
+from adaptivemodel import AdaptiveModel
 import StudentConstructor
-import StudentModel
-import DomainModeling
+from studentmodel import StudentModel
+from domainmodel import DomainModel
 import SessionTracker
 
 import networkx as nx
@@ -14,7 +14,7 @@ class UserInterface:
     def __init__(self) -> None:
 
         self.currStudent = None
-        self.recommender = Recommender()
+        self.recommender = AdaptiveModel()
         self.sessionTracker = SessionTracker()
         self.finished = False # is set to True if the student logs out
         self.startTime = 0 # for tracking usage
@@ -48,7 +48,7 @@ class UserInterface:
     def getStudentFromDatabase(self) -> None:
 
         (username, password) = self.login()
-        self.currStudent = getStudent(username, password)
+        # self.currStudent = getStudent(username, password)
         self.recommender.setStudentModel(self.currStudent)
 
         pass

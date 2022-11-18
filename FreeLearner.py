@@ -2,7 +2,7 @@
 Runs MVP of FreeLearner
 '''
 
-from StudentModel import StudentModel
+from studentmodel import StudentModel
 
 
 def runFreeLearnerMVP():

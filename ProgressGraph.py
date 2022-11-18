@@ -1,5 +1,5 @@
 from FoxQueue import PriorityQueue
-import WikiNode
+from wikinode import WikiNode
 import networkx as nx
 
 class ProgressGraph:
