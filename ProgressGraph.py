@@ -1,22 +1,7 @@
-"""
-Represents a node in the graph of Wikipedia articles.
-Includes title, url, summary, categories, linked pages, and content of page.
-Uses NLP on content to determine key words, which are used by recommender system.
-"""
-
-<<<<<<< Updated upstream
-import wikipedia
-import yake
-=======
->>>>>>> Stashed changes
-import networkx as nx
 from FoxQueue import PriorityQueue
 import WikiNode
-from mediawiki import MediaWiki
 
-# from owlready2 import *
-
-class KnowledgeGraph:
+class ProgressGraph:
 
     def __init__(self) -> None:
 
@@ -59,14 +44,4 @@ class KnowledgeGraph:
         # something like the lines below, but ranked based on interests / NLP / key words ?
         # for pg in node.linkedPages:
             # studentFringe.add(WikiNode(pg, node.title)) # should add the node object to keep track of parent node, not just the title
-        # TODO: update student interests in student model
-
-if __name__ == "__main__":
-
-    wikipedia = MediaWiki() 
-
-    # onto = get_ontology("file:///Users/quentinharrington/Desktop/COMP484/aied-project/wiki_cats_full_non_cyclic_v1.owl")
-    # onto.load()
-    # ontoList = list(onto.classes())
-    # print(ontoList)
-
+        # TODO: update student interests
