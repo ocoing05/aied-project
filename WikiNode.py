@@ -6,14 +6,19 @@ Uses NLP on content to determine key words, which are used by recommender system
 
 # pip3 install wikipedia_sections
 
-import wikipedia
+# import wikipedia
 import yake
+from mediawiki import MediaWiki
 
 class WikiNode:
+
     def __init__(self, title, prevNode = None):
+
         self.title = title
 
-        self.page = wikipedia.page(self.title)
+        self.wikipedia = MediaWiki()
+
+        self.page = self.wikipedia.page(self.title)
         # these would be like children in the tree
         self.linkedPages = self.page.links
 
@@ -34,7 +39,7 @@ class WikiNode:
 
     # returns opening sentences of article, before the sections begin
     def getSummary(self, sentences):
-        self.summary = wikipedia.summary(self.title, sentences)
+        return self.wikipedia.summary(self.title, sentences)
 
     def getSectionTitles(self):
         return self.page.sections
@@ -65,20 +70,22 @@ class WikiNode:
     #             sectionContents[section] = self.page.section(section)
     #     return sectionContents
 
-# TESTING / EXAMPLES
+if __name__ == "__main__":
 
-# test = WikiNode("Dinosaurs")
-# print(test.getSummary(4))
+    # TESTING / EXAMPLES
 
-# print("LINKS")
-# print(test.linkedPages)
+    test = WikiNode("Dinosaurs")
+    print(test.getSummary(4))
 
-# print("KEYWORDS")
-# keywords = test.getKeyWords()
-# print(keywords)
+    print("LINKS")
+    print(test.linkedPages)
 
-# print("BOTH LINK AND KEYWORD")
-# print(set(test.linkedPages) & set(keywords))
+    print("KEYWORDS")
+    keywords = test.getKeyWords()
+    print(keywords)
 
-# print("SECTION TITLES")
-# print(test.getSectionTitles())
+    print("BOTH LINK AND KEYWORD")
+    print(set(test.linkedPages) & set(keywords))
+
+    print("SECTION TITLES")
+    print(test.getSectionTitles())
