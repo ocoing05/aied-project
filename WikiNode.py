@@ -4,11 +4,12 @@ Includes title, url, summary, categories, linked pages, and content of page.
 Uses NLP on content to determine key words, which are used by recommender system.
 """
 
-# pip3 install wikipedia_sections
-
 # import wikipedia
 import yake
 from mediawiki import MediaWiki
+
+wikipedia = MediaWiki()
+wikipedia.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone' # MediaWiki ettiquete i
 
 class WikiNode:
 
@@ -16,25 +17,12 @@ class WikiNode:
 
         self.title = title
 
-        self.wikipedia = MediaWiki()
-        self.wikipedia.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone' # MediaWiki ettiquete i
-
-        self.page = self.wikipedia.page(self.title)
-        # these would be like children in the tree
-        self.linkedPages = self.page.links
-
-        # parent in the tree ? ... the article they read to get this suggestion
-        # not sure if this is needed
+        # the article they read previously to get this suggestion
         self.prevNode = prevNode
 
-        self.keyWords = self.getKeyWords()
-
-        # dictionary containing contents of each section
-        self.sectionContents = {}
-        for section in self.page.sections:
-            content = self.page.section(section)
-            if len(content) > 0: # non-empty section
-                self.sectionContents[section] = content
+        self.page = self.wikipedia.page(title)
+        self.linkedPages = self.page.links
+        self.keywords = []
 
     def getURL(self):
         return "https://en.wikipedia.org/wiki/" + self.title
@@ -49,36 +37,42 @@ class WikiNode:
     def getSummary(self, sentences):
         return self.wikipedia.summary(self.title, sentences)
 
+    def getKeywords(self):
+        if (len(self.keywords) > 0):
+            return self.keywords
+        else:
+            text = self.getContent()
+            language = "en"
+            max_ngram_size = 2
+            deduplication_threshold = 0.9 # set to 0.1 to prohibit repeated words in key words
+            numOfKeywords = 50
+            extractor = yake.KeywordExtractor(
+                lan=language, 
+                n=max_ngram_size, 
+                dedupLim=deduplication_threshold, 
+                top=numOfKeywords, 
+                features=None)
+            tuples = extractor.extract_keywords(text)
+            keywords = [i[0] for i in tuples]
+            self.keywords = keywords
+            return keywords
+
     def getSectionTitles(self):
         return self.page.sections
-
-    def getKeyWords(self):
-        text = self.getContent()
-        language = "en"
-        max_ngram_size = 2
-        deduplication_threshold = 0.9 # set to 0.1 to prohibit repeated words in key words
-        numOfKeywords = 50
-        extractor = yake.KeywordExtractor(
-            lan=language, 
-            n=max_ngram_size, 
-            dedupLim=deduplication_threshold, 
-            top=numOfKeywords, 
-            features=None)
-        tuples = extractor.extract_keywords(text)
-        keywords = [i[0] for i in tuples]
-
-        return keywords
     
-    def getSectionContents(self, section):
-
-        if section not in self.sectionContents:
+    # moved out of init method bc we don't want to generate this upon all node initializations, 
+    # since some nodes may be created for fringe but never read, so all this data doesn't need to be found/saved in that case
+    def getSection(self, section):
+        if section not in self.page.sections:
             return ("No section titled ", section)
         else:
-            return self.sectionContents[section]
+            content = self.page.section(section)
+            if len(content) > 0:
+                return content
+            else:
+                return "Empty section"
 
 if __name__ == "__main__":
-
-    # TESTING / EXAMPLES
 
     test = WikiNode("Dinosaurs")
     print(test.getSummary(4))
