@@ -8,12 +8,12 @@ Uses NLP on content to determine key words, which are used by recommender system
 import yake
 from mediawiki import MediaWiki
 
-wikipedia = MediaWiki()
-wikipedia.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone' # MediaWiki ettiquete i
-
 class WikiNode:
 
     def __init__(self, title, prevNode = None):
+
+        self.wikipedia = MediaWiki()
+        self.wikipedia.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone' # MediaWiki ettiquete
 
         self.title = title
 
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     print(test.linkedPages)
 
     print("KEYWORDS")
-    keywords = test.getKeyWords()
+    keywords = test.getKeywords()
     print(keywords)
 
     print("BOTH LINK AND KEYWORD")
@@ -91,4 +91,4 @@ if __name__ == "__main__":
     print(test.getSectionTitles())
 
     print("CONTENTS OF SECTION TITLED: '", test.getSectionTitles()[0], "'")
-    print(test.getSectionContents(test.getSectionTitles()[0]))
+    print(test.getSection(test.getSectionTitles()[0]))
