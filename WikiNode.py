@@ -34,10 +34,13 @@ class WikiNode:
         return self.page.content
 
     # returns opening sentences of article, before the sections begin
-    def getSummary(self, sentences):
-        return self.wikipedia.summary(self.title, sentences)
+    def getSummary(self, sentences = None):
+        if sentences:
+            return self.wikipedia.summary(self.title, sentences)
+        else:
+            return self.wikipedia.summary(self.title)
 
-    def getKeywords(self):
+    def getKeyWords(self):
         if (len(self.keywords) > 0):
             return self.keywords
         else:
@@ -75,13 +78,13 @@ class WikiNode:
 if __name__ == "__main__":
 
     test = WikiNode("Dinosaurs")
-    print(test.getSummary(4))
+    print(test.getSummary())
 
     print("LINKS")
     print(test.linkedPages)
 
     print("KEYWORDS")
-    keywords = test.getKeywords()
+    keywords = test.getKeyWords()
     print(keywords)
 
     print("BOTH LINK AND KEYWORD")

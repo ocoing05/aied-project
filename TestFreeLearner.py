@@ -1,5 +1,5 @@
-from studentmodel import StudentModel
-from wikinode import WikiNode
+from StudentModel import StudentModel
+from WikiNode import WikiNode
 
 # *** MOCK DATA ***
 
@@ -20,14 +20,15 @@ article6 = WikiNode("Mickey Mouse", "Disney")
 # *** WikiNode ***
 def testWikiNodes():
     testSections()
-    # testSummary() # TODO: api not working right atm.. need to fix
+    testSummary()
     testPrevNode()
     testKeyWords()
 
 def testSections():
-    # print(article1.getSectionTitles())
     assert 'History' in article1.getSectionTitles()
     assert 'Legacy' in article1.getSectionTitles()
+    assert article1.getSection('History') == 'Empty section'
+    assert "Bob Iger introduced D23 in 2009" in article1.getSection("2005–2020: Bob Iger's leadership, expansion, and Disney+")
 
 def testSummary():
     # print(article4.getSummary(4))
@@ -71,3 +72,6 @@ def testUI():
 if __name__ == "__main__":
     testWikiNodes()
     testStudentModel()
+    testRecommender()
+    testUI()
+    print("All tests pass.")
