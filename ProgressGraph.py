@@ -1,6 +1,11 @@
+import networkx as nx
+# import spacy
+
 from FoxQueue import PriorityQueue
 from WikiNode import WikiNode
-import networkx as nx
+
+nlp = spacy.load("en_core_web_sm")
+s2v = nlp.add_pipe("sense2vec")
 
 class ProgressGraph:
 
@@ -42,10 +47,15 @@ class ProgressGraph:
     def updateFringe(self, node, studentInterests):
         '''Called by the student model update() method after a student reads a new article.
         Updates fringe with linked articles from node they just read. Ranked based on student interests.'''
-        # TODO: make this method work based on keyword comparison with spacy
+        for pg in node.linkedPages:
+            priority = self.getPriority(pg, studentInterests)
+            self.fringe.add(WikiNode(pg, node.title), priority)
+        # TODO: possibly update existing queue elements on new interest values as well???
 
-        # past pseudocode for reference ...
+    def getPriority(self, title, studentInterests):
+        # TODO: return a priority value for title based on spacy analysis against studentInterests list
 
+        # --- past code for reference: ---
         #     for key in self.fringe:
         #         words = key.getKeywords()
         #         interestCounter = 0
@@ -55,7 +65,20 @@ class ProgressGraph:
         #         potentialInterest = interestCounter / len(words)
         #         self.fringe[key] = potentialInterest
 
-        # something like the lines below, but ranked based on interests / NLP / key words ?
-        # for pg in node.linkedPages:
-            # studentFringe.add(WikiNode(pg, node.title)) # should add the node object to keep track of parent node, not just the title
-        pass
+        return 0 # TODO: change once method is implemented fully
+
+if __name__ == "__main__":
+
+    '''spacy / sense2vec'''
+    # terminal commands:
+    # pip3 install -U pip setuptools wheel
+    # pip3 install -U spacy
+    # python3 -m spacy download en_core_web_sm
+    # pip3 install sense2vec==1.0.0a1
+
+    # requires downloading large pretrained files ???
+
+    '''gensim'''
+    # 
+
+    pass
