@@ -1,5 +1,6 @@
 from studentmodel import StudentModel
 from wikinode import WikiNode
+from progressgraph import ProgressGraph
 
 # *** MOCK DATA ***
 
@@ -46,18 +47,40 @@ def testKeyWords():
 
 # *** StudentModel ***
 def testStudentModel():
-    testUpdateGraph()
+    pass
     # TODO: student creation, fringe updates, student interest updates, session stats
 
-def testUpdateGraph():
-    # student1 reads article1
-    student1.updateGraph(article1)   
+# *** ExplorationTracker ***
+def testExplorationTracker():
+    testGraph()
+    testFringe()
+
+def testGraph():
+    student1.updateModel(article1)
     assert len(list(student1.progressGraph.graph.nodes)) == 1
     # TODO : test that fringe was updated with linked nodes in prioritized order ?
+    # and test that the student interests were updated correctly
     # student1 reads article6
-    student1.updateGraph(article6)
+    student1.updateModel(article6)
     assert len(list(student1.progressGraph.graph.nodes)) == 2
     assert len(student1.progressGraph.graph.edges) == 1
+
+def testFringe():
+    testPriorityRankings()
+    testUpdateFringe()
+
+def testPriorityRankings():
+    et = ProgressGraph()
+    priority1 = et.getPriority(WikiNode('Science'), {'math': (1,1), 'physics': (1,1)})
+    priority2 = et.getPriority(WikiNode('Science'), {'dogs': (1,1), 'Disney': (1,1)})
+    priority3 = et.getPriority(WikiNode('Science'), {'math': (1,0.5), 'physics': (1,0.5)})
+    priority4 = et.getPriority(WikiNode('Science'), {'math': (1,0.5), 'physics': (1,0.8)})
+    assert priority1 > priority2
+    assert priority1 > priority3
+    assert priority4 > priority3
+    
+def testUpdateFringe():
+    pass
 
 # *** Recommender ***
 def testRecommender():
@@ -70,8 +93,9 @@ def testUI():
 # *** RUN TESTS ***
 
 if __name__ == "__main__":
-    testWikiNodes()
-    testStudentModel()
-    testRecommender()
-    testUI()
+    # testWikiNodes()
+    # testStudentModel()
+    testExplorationTracker()
+    # testRecommender()
+    # testUI()
     print("All tests pass.")
