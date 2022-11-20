@@ -1,5 +1,5 @@
 import networkx as nx
-# import spacy
+import spacy
 
 from FoxQueue import PriorityQueue
 from WikiNode import WikiNode
@@ -66,13 +66,11 @@ class ProgressGraph:
 
 if __name__ == "__main__":
 
-    '''spacy / sense2vec'''
     # terminal commands:
     # pip3 install -U pip setuptools wheel
     # pip3 install -U spacy
     # python3 -m spacy download en_core_web_lg
 
-    import spacy
     nlp = spacy.load('en_core_web_lg')
     words = ''
     tokens = nlp(words)
