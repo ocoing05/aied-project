@@ -2,9 +2,11 @@ import networkx as nx
 import spacy
 
 from FoxQueue import PriorityQueue
-from WikiNode import WikiNode
+from wikinode import WikiNode
 
 class ProgressGraph:
+
+    # TODO: maybe rename this to explorationTracker ??
 
     def __init__(self) -> None:
         self.fringe = PriorityQueue() # unopened WikiNodes adjacent to progressGraph, sorted by potential interest

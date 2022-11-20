@@ -1,9 +1,9 @@
 
 from adaptivemodel import AdaptiveModel
-import StudentConstructor
+import studentconstructor
 from studentmodel import StudentModel
 from domainmodel import DomainModel
-import SessionTracker
+import sessiontracker
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -15,7 +15,7 @@ class UserInterface:
 
         self.currStudent = None
         self.recommender = AdaptiveModel()
-        self.sessionTracker = SessionTracker()
+        self.sessionTracker = sessiontracker()
         self.finished = False # is set to True if the student logs out
         self.startTime = 0 # for tracking usage
         self.endTime = 0 # for tracking usage
@@ -38,7 +38,7 @@ class UserInterface:
 
     def makeNewStudent(self) -> None:
 
-        studentConstructor = StudentConstructor()
+        studentConstructor = studentconstructor()
         self.currStudent = studentConstructor.buildStudentModel()
         self.recommender.setStudentModel(self.currStudent)
         self.tutorial()

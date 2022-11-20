@@ -1,11 +1,11 @@
-import SessionStats
+import sessionstats
 import time 
 
 class SessionTracker:
 
     def __init__(self) -> None:
 
-        self.sessionStats = SessionStats()
+        self.sessionStats = sessionstats()
         self.startTime = 0
         self.currNode = None
         pass

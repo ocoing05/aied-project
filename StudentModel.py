@@ -1,4 +1,4 @@
-from ProgressGraph import ProgressGraph
+from progressgraph import ProgressGraph
 
 class StudentModel:
 
