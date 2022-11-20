@@ -4,6 +4,8 @@ import spacy
 from FoxQueue import PriorityQueue
 from wikinode import WikiNode
 
+nlp = spacy.load('en_core_web_lg')
+
 class ProgressGraph:
 
     # TODO: maybe rename this to explorationTracker ??
@@ -51,32 +53,34 @@ class ProgressGraph:
             self.fringe.add(WikiNode(pg, node.title), priority)
         # TODO: possibly update existing queue elements on new interest values as well???
 
-    def getPriority(self, title, studentInterests):
-        # TODO: return a priority value for title based on spacy analysis against studentInterests list
-
-        # --- past code for reference: ---
-        #     for key in self.fringe:
-        #         words = key.getKeywords()
-        #         interestCounter = 0
-        #         for word in words:
-        #             # if (word is in self.studentModel.interestKeywords):
-        #                 # interestCounter += self.studentModel.interestKeywords[word]
-        #         potentialInterest = interestCounter / len(words)
-        #         self.fringe[key] = potentialInterest
-
-        return 0 # TODO: change once method is implemented fully
+    def getPriority(self, node, studentInterests):
+        # option for future implementation?: getKeyWords() of node and then use those to compare against studentInterests
+        words = node.title
+        for interest in studentInterests.keys():
+            words = words + ' ' + interest
+        tokens = nlp(words)
+        priority = 0
+        interestTokens = tokens[1:]
+        for i in interestTokens:
+            if not i.is_oov: # word exists in nlp model
+                interestVal = studentInterests[i.text][1]
+                priority += tokens[0].similarity(i) * interestVal
+        return priority
 
 if __name__ == "__main__":
 
-    # terminal commands:
     # pip3 install -U pip setuptools wheel
     # pip3 install -U spacy
     # python3 -m spacy download en_core_web_lg
 
-    nlp = spacy.load('en_core_web_lg')
-    words = ''
-    tokens = nlp(words)
-    for token in tokens:
-        print(token.text, token.has_vector, token.vector_norm, token.is_oov)
-    # has_vector: if it contains a vector representation in the model, vector_norm: the algebraic norm of the vector, is_oov: if the word is out of vocabulary.
-    print(tokens[0].similarity(tokens[1]))
+    # token attributes:
+    # TODO: might need to use this? what if a word isn't recognized in nlp?
+    # has_vector: if it contains a vector representation in the model,
+    # is_oov: if the word is out of vocabulary.
+
+    # only for 1-gram ??
+
+    test = ProgressGraph()
+    print(test.getPriority(WikiNode('Dogs'), {'cats': (1,1), 'dinosaurs': (1,1)})) # highest priority
+    print(test.getPriority(WikiNode('Dogs'), {'cats': (1,0.5), 'dinosaurs': (1,1)})) # smaller priority
+    print(test.getPriority(WikiNode('dogs'), {'fashion': (1,1), 'winter': (1,1)})) # low priority
