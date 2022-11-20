@@ -4,9 +4,6 @@ import networkx as nx
 from FoxQueue import PriorityQueue
 from WikiNode import WikiNode
 
-nlp = spacy.load("en_core_web_sm")
-s2v = nlp.add_pipe("sense2vec")
-
 class ProgressGraph:
 
     def __init__(self) -> None:
@@ -73,12 +70,13 @@ if __name__ == "__main__":
     # terminal commands:
     # pip3 install -U pip setuptools wheel
     # pip3 install -U spacy
-    # python3 -m spacy download en_core_web_sm
-    # pip3 install sense2vec==1.0.0a1
+    # python3 -m spacy download en_core_web_lg
 
-    # requires downloading large pretrained files ???
-
-    '''gensim'''
-    # 
-
-    pass
+    import spacy
+    nlp = spacy.load('en_core_web_lg')
+    words = ''
+    tokens = nlp(words)
+    for token in tokens:
+        print(token.text, token.has_vector, token.vector_norm, token.is_oov)
+    # has_vector: if it contains a vector representation in the model, vector_norm: the algebraic norm of the vector, is_oov: if the word is out of vocabulary.
+    print(tokens[0].similarity(tokens[1]))
