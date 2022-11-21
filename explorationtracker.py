@@ -6,7 +6,7 @@ from wikinode import WikiNode
 
 nlp = spacy.load('en_core_web_lg')
 
-class ProgressGraph:
+class ExplorationTracker:
 
     # TODO: maybe rename this to explorationTracker ??
 
@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     # only for 1-gram ??
 
-    test = ProgressGraph()
+    test = ExplorationTracker()
     print(test.getPriority(WikiNode('Dogs'), {'cats': (1,1), 'dinosaurs': (1,1)})) # highest priority
     print(test.getPriority(WikiNode('Dogs'), {'cats': (1,0.5), 'dinosaurs': (1,1)})) # smaller priority
     print(test.getPriority(WikiNode('dogs'), {'fashion': (1,1), 'winter': (1,1)})) # low priority

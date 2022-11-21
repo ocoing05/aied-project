@@ -1,4 +1,4 @@
-from progressgraph import ProgressGraph
+from explorationtracker import ExplorationTracker
 
 class StudentModel:
 
@@ -18,7 +18,7 @@ class StudentModel:
             self.interestKeywords[interest] = (1, 1) # initializing all interests retrieved from survey
 
         # explorationTracker contains explored graph, fringe queue, and visited queue(?)
-        self.explorationTracker = ProgressGraph()
+        self.explorationTracker = ExplorationTracker()
         
         # TODO: add initial interestKeywords as WikiNode objects to the fringe if they exist as wiki articles
 

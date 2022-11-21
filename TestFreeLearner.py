@@ -1,6 +1,6 @@
 from studentmodel import StudentModel
 from wikinode import WikiNode
-from progressgraph import ProgressGraph
+from explorationtracker import ExplorationTracker
 
 # *** MOCK DATA ***
 
@@ -70,7 +70,7 @@ def testFringe():
     testUpdateFringe()
 
 def testPriorityRankings():
-    et = ProgressGraph()
+    et = ExplorationTracker()
     priority1 = et.getPriority(WikiNode('Science'), {'math': (1,1), 'physics': (1,1)})
     priority2 = et.getPriority(WikiNode('Science'), {'dogs': (1,1), 'Disney': (1,1)})
     priority3 = et.getPriority(WikiNode('Science'), {'math': (1,0.5), 'physics': (1,0.5)})
