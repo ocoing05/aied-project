@@ -49,7 +49,7 @@ class StudentModel:
         self.explorationTracker.updateFringe(node, self.interestKeywords)
 
     def updateInterests(self, node):
-        # for the WikiNode article they just read, update interests accordingly
+        # TODO: for the WikiNode article they just read, update interests accordingly
         # call updateInterestKeyword for each keyword that needs to be updated
         pass
 

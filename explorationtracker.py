@@ -8,8 +8,6 @@ nlp = spacy.load('en_core_web_lg')
 
 class ExplorationTracker:
 
-    # TODO: maybe rename this to explorationTracker ??
-
     def __init__(self) -> None:
         self.fringe = PriorityQueue() # unopened WikiNodes adjacent to progressGraph, sorted by potential interest
         self.graph = nx.Graph() # graph of already read articles and edges between them represent from what link they were discovered
@@ -54,7 +52,7 @@ class ExplorationTracker:
         # TODO: possibly update existing queue elements on new interest values as well???
 
     def getPriority(self, node, studentInterests):
-        # option for future implementation?: getKeyWords() of node and then use those to compare against studentInterests
+        # option for future?: getKeyWords() of node and then use those to compare against studentInterests
         words = node.title
         for interest in studentInterests.keys():
             words = words + ' ' + interest
@@ -69,16 +67,7 @@ class ExplorationTracker:
 
 if __name__ == "__main__":
 
-    # pip3 install -U pip setuptools wheel
-    # pip3 install -U spacy
-    # python3 -m spacy download en_core_web_lg
-
-    # token attributes:
-    # TODO: might need to use this? what if a word isn't recognized in nlp?
-    # has_vector: if it contains a vector representation in the model,
-    # is_oov: if the word is out of vocabulary.
-
-    # only for 1-gram ??
+    # TODO: does this only work for 1-gram ??
 
     test = ExplorationTracker()
     print(test.getPriority(WikiNode('Dogs'), {'cats': (1,1), 'dinosaurs': (1,1)})) # highest priority
