@@ -8,12 +8,15 @@ nlp = spacy.load('en_core_web_lg')
 
 class ExplorationTracker:
 
-    def __init__(self) -> None:
+    def __init__(self, initialInterests) -> None:
         self.fringe = PriorityQueue() # unopened WikiNodes adjacent to progressGraph, sorted by potential interest
         self.graph = nx.Graph() # graph of already read articles and edges between them represent from what link they were discovered
 
         # we may not need this as a priority queue since the graph is already holding all of the visited nodes & we could add any stats needed to there?
         self.visited = PriorityQueue() 
+        
+        for i in initialInterests:
+            self.fringe.insert(WikiNode(i), 1) # TODO: not sure if we want 1 here eventually?
 
     # i don't think we need this since all update methods are called from student object but keeping it for rn just in case ?
     # def update(self, wikiNode) -> None:
@@ -48,7 +51,7 @@ class ExplorationTracker:
         Updates fringe with linked articles from node they just read. Ranked based on student interests.'''
         for pg in node.linkedPages:
             priority = self.getPriority(pg, studentInterests)
-            self.fringe.add(WikiNode(pg, node.title), priority)
+            self.fringe.insert(WikiNode(pg, node.title), priority)
         # TODO: possibly update existing queue elements on new interest values as well???
 
     def getPriority(self, node, studentInterests):
