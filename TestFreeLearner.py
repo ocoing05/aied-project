@@ -70,7 +70,7 @@ def testFringe():
     testUpdateFringe()
 
 def testPriorityRankings():
-    et = ExplorationTracker()
+    et = ExplorationTracker([])
     priority1 = et.getPriority(WikiNode('Science'), {'math': (1,1), 'physics': (1,1)})
     priority2 = et.getPriority(WikiNode('Science'), {'dogs': (1,1), 'Disney': (1,1)})
     priority3 = et.getPriority(WikiNode('Science'), {'math': (1,0.5), 'physics': (1,0.5)})
@@ -95,7 +95,7 @@ def testUI():
 if __name__ == "__main__":
     # testWikiNodes()
     # testStudentModel()
-    testExplorationTracker()
+    # testExplorationTracker()
     # testRecommender()
     # testUI()
     print("All tests pass.")

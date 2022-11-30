@@ -16,7 +16,8 @@ class ExplorationTracker:
         self.visited = PriorityQueue() 
         
         for i in initialInterests:
-            self.fringe.insert(WikiNode(i), 1) # TODO: not sure if we want 1 here eventually?
+            self.fringe.insert(WikiNode(i), 1.0)
+            # self.updateFringe(i, initialInterests) # TODO: not sure if we want 1 here eventually?
 
     # i don't think we need this since all update methods are called from student object but keeping it for rn just in case ?
     # def update(self, wikiNode) -> None:
@@ -50,7 +51,9 @@ class ExplorationTracker:
         '''Called by the student model update() method after a student reads a new article.
         Updates fringe with linked articles from node they just read. Ranked based on student interests.'''
         for pg in node.linkedPages:
+            # print(pg)
             priority = self.getPriority(pg, studentInterests)
+            # print(priority)
             self.fringe.insert(WikiNode(pg, node.title), priority)
         # TODO: possibly update existing queue elements on new interest values as well???
 
