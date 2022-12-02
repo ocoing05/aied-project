@@ -16,14 +16,14 @@ def runFreeLearnerMVP():
         cmd = input('Type n to get a new suggestion or q to quit FreeLearner: ')
         if cmd == 'q':
             break
-        result = getArticles(student)
-        if result == 0:
+        student = getArticles(student)
+        if student == 0:
             print("No suggestions.")
             break
 
 
 def getArticles(student):
-    '''Get new options and print URL of the chosen article'''
+    '''Get new options and print URL of the chosen article. Returns updated student.'''
 
     suggestions = getTopSuggestions(3, student.explorationTracker.fringe)
     if len(suggestions) == 0:
@@ -51,7 +51,7 @@ def getArticles(student):
     #     # continueInput = input('Enter n to read next section, c to cancel article: ')
 
     student.updateModel(currArticle) # update student model based on what they just read 
-    return 1
+    return student
 
 def createInterestList(str):
     return str.split(',')

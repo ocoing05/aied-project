@@ -15,7 +15,8 @@ class StudentModel:
                                     #   2. Dividing summed value by number of times updated
 
         for interest in interestKeywords:
-            self.interestKeywords[interest] = (1, 1) # initializing all interests retrieved from survey
+            i = interest.lower()
+            self.interestKeywords[i] = (1, 1) # initializing all interests retrieved from survey
 
         # explorationTracker contains explored graph, fringe queue, and visited queue(?)
         self.explorationTracker = ExplorationTracker(interestKeywords)
@@ -49,21 +50,22 @@ class StudentModel:
         self.explorationTracker.updateFringe(node, self.interestKeywords)
 
     def updateInterests(self, node):
-        # TODO: for the WikiNode article they just read, update interests accordingly
-        # call updateInterestKeyword for each keyword that needs to be updated
-        pass
+        # for the WikiNode article they just read, update interests of keywords accordingly
+        kw = node.getKeyWords()
+        for i in range(len(kw)):
+            self.updateInterestKeyword(kw[i], len(kw)-i/len(kw)) # first keywords in list get high interest. 0-1 interest levels here
 
     def updateInterestKeyword(self, keyword, newInterestValue) -> None:
         """This function is called when a new interest value is retrieved,
         regardless of if the keyword already exists in the self.interestKeywords dictionary."""
 
         # add new keyword to interestKeywords
-        if not self.getInterestKeywords().contains(keyword):
-            self.interestKeywords[keyword] = (1, newInterestValue)
+        if not keyword in self.getInterestKeywords():
+            self.interestKeywords[keyword.lower()] = (1, newInterestValue)
         # update interest level in interestKeywords list
         else:
             (timesUpdated, interestLevel) = self.interestKeywords[keyword]
 
             newTimesUpdated = timesUpdated + 1
             newInterestLevel = (interestLevel + newInterestValue)/newTimesUpdated 
-            self.interestKeywords[keyword] = (newTimesUpdated, newInterestLevel)
+            self.interestKeywords[keyword.lower()] = (newTimesUpdated, newInterestLevel)

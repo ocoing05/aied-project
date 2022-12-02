@@ -51,10 +51,11 @@ class ExplorationTracker:
         '''Called by the student model update() method after a student reads a new article.
         Updates fringe with linked articles from node they just read. Ranked based on student interests.'''
         for pg in node.linkedPages:
-            # print(pg)
+            print(pg)
             if len(pg.strip().split(" ")) > 1: # more than 1-gram phrases won't be done properly with the getPriority() logic rn
                # TODO: logic for n-gram pages
-               break
+               print("n-gram")
+               continue
             priority = self.getPriority(pg, studentInterests)
             # print(priority)
             self.fringe.insert(WikiNode(pg, node.title), priority)
@@ -70,7 +71,8 @@ class ExplorationTracker:
         interestTokens = tokens[1:]
         for i in interestTokens:
             if not i.is_oov: # word exists in nlp model
-                interestVal = studentInterests[i.text][1]
+                x = studentInterests[i.text] # TODO: error coming from this line
+                interestVal = x[1]
                 priority += tokens[0].similarity(i) * interestVal
         return priority
 
