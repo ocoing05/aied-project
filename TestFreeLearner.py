@@ -47,8 +47,15 @@ def testKeyWords():
 
 # *** StudentModel ***
 def testStudentModel():
-    pass
+    testStudentCreation()
     # TODO: student creation, fringe updates, student interest updates, session stats
+
+def testStudentCreation():
+    student2 = StudentModel("test", "test", "12345", "test@test.com", ["Dogs", "Dinosaurs", "Volcanoes", "Disney"])
+    assert student2.getStudentName() == 'test'
+    assert 'Dogs' in student2.getInterestKeywords()
+    assert 'Volcanoes' in student2.getInterestKeywords()
+    # TODO : test fringe creation
 
 # *** ExplorationTracker ***
 def testExplorationTracker():

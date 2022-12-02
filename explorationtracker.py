@@ -52,15 +52,18 @@ class ExplorationTracker:
         Updates fringe with linked articles from node they just read. Ranked based on student interests.'''
         for pg in node.linkedPages:
             # print(pg)
+            if len(pg.strip().split(" ")) > 1: # more than 1-gram phrases won't be done properly with the getPriority() logic rn
+               # TODO: logic for n-gram pages
+               break
             priority = self.getPriority(pg, studentInterests)
             # print(priority)
             self.fringe.insert(WikiNode(pg, node.title), priority)
         # TODO: possibly update existing queue elements on new interest values as well???
 
-    def getPriority(self, node, studentInterests):
+    def getPriority(self, nodeTitle, studentInterests):
         # option for future?: getKeyWords() of node and then use those to compare against studentInterests
-        words = node.title
-        for interest in studentInterests.keys():
+        words = nodeTitle
+        for interest in list(studentInterests.keys()):
             words = words + ' ' + interest
         tokens = nlp(words)
         priority = 0
