@@ -44,11 +44,12 @@ class StudentModel:
             Parameter node = the WikiNode representing the article they just read.'''
         # update progress graph with new WikiNode article read
         self.explorationTracker.updateGraph(node)
-        # update student interests based on the article
-        self.updateInterests(node)
         # update fringe queue with linked nodes
         self.explorationTracker.updateFringe(node, self.interestKeywords)
+        # update student interests based on the article
+        self.updateInterests(node)
 
+    # TODO: how to best make sure these are ranked accordingly with already present kws? maybe actually update ALL interest values not just new?
     def updateInterests(self, node):
         # for the WikiNode article they just read, update interests of keywords accordingly
         kw = node.getKeyWords()

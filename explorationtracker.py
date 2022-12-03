@@ -1,5 +1,6 @@
 import networkx as nx
 import spacy
+import re
 
 from FoxQueue import PriorityQueue
 from wikinode import WikiNode
@@ -50,15 +51,21 @@ class ExplorationTracker:
     def updateFringe(self, node, studentInterests):
         '''Called by the student model update() method after a student reads a new article.
         Updates fringe with linked articles from node they just read. Ranked based on student interests.'''
+        # TODO: to speed up process, maybe only add certain most relevant linked articles to the fringe ?
         for pg in node.linkedPages:
             print(pg)
+            pg = re.sub(r'\W+', ' ', pg) # replaces all non-alphanumeric/underscore characters w space
             if len(pg.strip().split(" ")) > 1: # more than 1-gram phrases won't be done properly with the getPriority() logic rn
                # TODO: logic for n-gram pages
-               print("n-gram")
+               # print("n-gram")
                continue
             priority = self.getPriority(pg, studentInterests)
             # print(priority)
-            self.fringe.insert(WikiNode(pg, node.title), priority)
+            try:
+                node = WikiNode(pg, node.title)
+            except:
+                continue
+            self.fringe.insert(node, priority)
         # TODO: possibly update existing queue elements on new interest values as well???
 
     def getPriority(self, nodeTitle, studentInterests):
@@ -71,9 +78,10 @@ class ExplorationTracker:
         interestTokens = tokens[1:]
         for i in interestTokens:
             if not i.is_oov: # word exists in nlp model
-                x = studentInterests[i.text] # TODO: error coming from this line
+                x = studentInterests[i.text]
                 interestVal = x[1]
-                priority += tokens[0].similarity(i) * interestVal
+                priority += tokens[0].similarity(i) * interestVal 
+        # TODO: should this be normalized to 0-1 range?
         return priority
 
 if __name__ == "__main__":
