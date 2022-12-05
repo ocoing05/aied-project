@@ -67,6 +67,7 @@ class ExplorationTracker:
                 node = WikiNode(pg, node.title)
             except:
                 continue
+            print(node.title, priority)
             self.fringe.insert(node, priority)
         # TODO: possibly update existing queue elements on new interest values as well???
 
@@ -78,18 +79,17 @@ class ExplorationTracker:
         tokens = nlp(words)
         priority = 0
         interestTokens = tokens[1:]
-        if tokens[0].is_oov: # if does not exist in nlp model, return 0 interest ? # TODO: is interest 0-1 or -1 to 1?
-            return 0
-        for i in interestTokens:
-            if i.is_oov:
-                x = studentInterests[i.text]
-                interestVal = x[1]
-                priority += tokens[0].similarity(i) * interestVal 
+        print(tokens[0])
+        print(tokens[0].has_vector)
+        if tokens[0].has_vector: # TODO: if does not exist in nlp model, return 0 interest... is this what we want ? is there way to ignore completely instead?
+            for i in interestTokens:
+                if i.is_oov:
+                    x = studentInterests[i.text]
+                    interestVal = x[1]
+                    priority += tokens[0].similarity(i) * interestVal 
         return (1 - priority / len(interestTokens))
 
 if __name__ == "__main__":
-
-    # TODO: does this only work for 1-gram ??
 
     test = ExplorationTracker()
     print(test.getPriority(WikiNode('Dogs'), {'cats': (1,1), 'dinosaurs': (1,1)})) # highest priority
