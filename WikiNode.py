@@ -48,7 +48,7 @@ class WikiNode:
             language = "en"
             max_ngram_size = 2
             deduplication_threshold = 0.9 # set to 0.1 to prohibit repeated words in key words
-            numOfKeywords = 50
+            numOfKeywords = 100
             extractor = yake.KeywordExtractor(
                 lan=language, 
                 n=max_ngram_size, 

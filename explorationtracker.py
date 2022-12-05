@@ -17,8 +17,8 @@ class ExplorationTracker:
         self.visited = PriorityQueue() 
         
         for i in initialInterests:
-            self.fringe.insert(WikiNode(i), 1.0)
-            # self.updateFringe(i, initialInterests) # TODO: not sure if we want 1 here eventually?
+            self.fringe.insert(WikiNode(i), 0.0)
+            # self.updateFringe(i, initialInterests)
 
     # i don't think we need this since all update methods are called from student object but keeping it for rn just in case ?
     # def update(self, wikiNode) -> None:
@@ -51,12 +51,14 @@ class ExplorationTracker:
     def updateFringe(self, node, studentInterests):
         '''Called by the student model update() method after a student reads a new article.
         Updates fringe with linked articles from node they just read. Ranked based on student interests.'''
-        # TODO: to speed up process, maybe only add certain most relevant linked articles to the fringe ?
-        for pg in node.linkedPages:
+        # TODO: before adding to fringe, make sure it doesn't exist in explored graph
+        lp = node.linkedPages
+        kw = node.getKeyWords()
+        for pg in set(lp) & set(kw): # words that exist as both linked pages and key words
             print(pg)
             pg = re.sub(r'\W+', ' ', pg) # replaces all non-alphanumeric/underscore characters w space
             if len(pg.strip().split(" ")) > 1: # more than 1-gram phrases won't be done properly with the getPriority() logic rn
-               # TODO: logic for n-gram pages
+               # TODO: logic for n-gram pages?
                # print("n-gram")
                continue
             priority = self.getPriority(pg, studentInterests)
@@ -76,13 +78,14 @@ class ExplorationTracker:
         tokens = nlp(words)
         priority = 0
         interestTokens = tokens[1:]
+        if tokens[0].is_oov: # if does not exist in nlp model, return 0 interest ? # TODO: is interest 0-1 or -1 to 1?
+            return 0
         for i in interestTokens:
-            if not i.is_oov: # word exists in nlp model
+            if i.is_oov:
                 x = studentInterests[i.text]
                 interestVal = x[1]
                 priority += tokens[0].similarity(i) * interestVal 
-        # TODO: should this be normalized to 0-1 range?
-        return priority
+        return (1 - priority / len(interestTokens))
 
 if __name__ == "__main__":
 

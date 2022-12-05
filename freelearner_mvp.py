@@ -31,8 +31,9 @@ def getArticles(student):
     print('Here are your options: ')
     for i in range(len(suggestions)):
         option = suggestions[i]
+        priority = option[1]
         node = option[0]
-        print(i, ": ", node.title)
+        print(i, ": ", node.title, " ", priority)
     choice = input('Which article would you like to read? ')
     currArticle = suggestions.pop(int(choice))[0] # take chosen article out of suggestions list
 
