@@ -47,14 +47,14 @@ class StudentModel:
         # update fringe queue with linked nodes
         self.explorationTracker.updateFringe(node, self.interestKeywords)
         # update student interests based on the article
-        self.updateInterests(node)
+        # self.updateInterests(node)
 
     # TODO: how to best make sure these are ranked accordingly with already present kws? maybe actually update ALL interest values not just new?
-    def updateInterests(self, node):
-        # for the WikiNode article they just read, update interests of keywords accordingly
-        kw = node.getKeyWords()
-        for i in range(len(kw)):
-            self.updateInterestKeyword(kw[i], len(kw)-i/len(kw)) # first keywords in list get high interest. 0-1 interest levels here
+    # def updateInterests(self, node):
+    #     # for the WikiNode article they just read, update interests of keywords accordingly
+    #     kw = node.getKeyWords()
+    #     for i in range(len(kw)):
+    #         self.updateInterestKeyword(kw[i], len(kw)-i/len(kw)) # first keywords in list get high interest. 0-1 interest levels here
 
     def updateInterestKeyword(self, keyword, newInterestValue) -> None:
         """This function is called when a new interest value is retrieved,

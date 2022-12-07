@@ -51,6 +51,10 @@ def getArticles(student):
     #     # print next section
     #     # continueInput = input('Enter n to read next section, c to cancel article: ')
 
+    enjoyment = input('On a scale of 1-5, how much did you enjoy that article?')
+    # TODO: also take into account how many sections they read ?? if section-by-section is implemented?
+    student.updateInterestKeyword(currArticle.title, 1 - int(enjoyment)/5) # not sure if this is exactly what we want, but for now keep it simple?
+
     student.updateModel(currArticle) # update student model based on what they just read 
     return student
 

@@ -18,7 +18,6 @@ class ExplorationTracker:
         
         for i in initialInterests:
             self.fringe.insert(WikiNode(i), 0.0)
-            # self.updateFringe(i, initialInterests)
 
     # i don't think we need this since all update methods are called from student object but keeping it for rn just in case ?
     # def update(self, wikiNode) -> None:
@@ -51,27 +50,30 @@ class ExplorationTracker:
     def updateFringe(self, node, studentInterests):
         '''Called by the student model update() method after a student reads a new article.
         Updates fringe with linked articles from node they just read. Ranked based on student interests.'''
-        # TODO: before adding to fringe, make sure it doesn't exist in explored graph
         lp = node.linkedPages
         kw = node.getKeyWords()
-        for pg in set(lp) & set(kw): # words that exist as both linked pages and key words
+        for pg in set(lp) & set(kw): # words that exist as both linked pages and key words of the node
             print(pg)
+            if self.alreadyExplored(pg): # that article was already read
+                continue
             pg = re.sub(r'\W+', ' ', pg) # replaces all non-alphanumeric/underscore characters w space
             if len(pg.strip().split(" ")) > 1: # more than 1-gram phrases won't be done properly with the getPriority() logic rn
                # TODO: logic for n-gram pages?
                # print("n-gram")
                continue
             priority = self.getPriority(pg, studentInterests)
+            if priority == -1: 
+                continue # ignore if does not exist in spacy nlp model
             # print(priority)
-            try:
+            try: # TODO: ideally this wouldn't be needed, but an error was coming up from MediaWiki for some titles
                 node = WikiNode(pg, node.title)
             except:
                 continue
             print(node.title, priority)
             self.fringe.insert(node, priority)
-        # TODO: possibly update existing queue elements on new interest values as well???
 
     def getPriority(self, nodeTitle, studentInterests):
+        # TODO: always returning 1.0 for some reason
         # option for future?: getKeyWords() of node and then use those to compare against studentInterests
         words = nodeTitle
         for interest in list(studentInterests.keys()):
@@ -81,13 +83,21 @@ class ExplorationTracker:
         interestTokens = tokens[1:]
         print(tokens[0])
         print(tokens[0].has_vector)
-        if tokens[0].has_vector: # TODO: if does not exist in nlp model, return 0 interest... is this what we want ? is there way to ignore completely instead?
+        if tokens[0].has_vector: 
             for i in interestTokens:
-                if i.is_oov:
+                if i.is_oov: # TODO: should always be true if we are adding to studentInterests right?
                     x = studentInterests[i.text]
                     interestVal = x[1]
                     priority += tokens[0].similarity(i) * interestVal 
+        else:
+            return -1 # nodeTitle does not exist in nlp model, can not be analyzed
         return (1 - priority / len(interestTokens))
+
+    def alreadyExplored(self, title):
+        if title in list(self.graph.nodes):
+            return True
+        else:
+            return False
 
 if __name__ == "__main__":
 

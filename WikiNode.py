@@ -46,7 +46,7 @@ class WikiNode:
         else:
             text = self.getContent()
             language = "en"
-            max_ngram_size = 2
+            max_ngram_size = 1 # only 1-gram so that spacy can work
             deduplication_threshold = 0.9 # set to 0.1 to prohibit repeated words in key words
             numOfKeywords = 100
             extractor = yake.KeywordExtractor(
