@@ -52,12 +52,14 @@ class ExplorationTracker:
         Updates fringe with linked articles from node they just read. Ranked based on student interests.'''
         lp = node.linkedPages
         kw = node.getKeyWords()
-        for pg in set(lp) & set(kw): # words that exist as both linked pages and key words of the node
-            print(pg)
+        # for pg in set(lp) & set(kw): # words that exist as both linked pages and key words of the node
+         # TODO: instead of using the set of both ^ like above, maybe use keywords to rank linked pages but don't disregard completely?
+        for pg in lp:
+            # print(pg)
             if self.alreadyExplored(pg): # that article was already read
                 continue
             pg = re.sub(r'\W+', ' ', pg) # replaces all non-alphanumeric/underscore characters w space
-            if len(pg.strip().split(" ")) > 1: # more than 1-gram phrases won't be done properly with the getPriority() logic rn
+            if len(pg.strip().split(" ")) > 1 or not pg.isalpha(): # more than 1-gram phrases and non-letters will mess up spacy's analysis
                # TODO: logic for n-gram pages?
                # print("n-gram")
                continue
@@ -77,7 +79,7 @@ class ExplorationTracker:
         words = nodeTitle
         for interest in list(studentInterests.keys()):
             words = words + ' ' + interest
-        tokens = nlp(words)
+        tokens = nlp(words) #TODO: the list separates by number too so for example "3M" would become ['3','M'] so then 'M' would be taken as the second word
         priority = 0
         interestTokens = tokens[1:]
         # print(tokens[0])
