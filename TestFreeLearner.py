@@ -78,13 +78,15 @@ def testFringe():
 
 def testPriorityRankings():
     et = ExplorationTracker([])
-    priority1 = et.getPriority(WikiNode('Science'), {'math': (1,1), 'physics': (1,1)})
-    priority2 = et.getPriority(WikiNode('Science'), {'dogs': (1,1), 'Disney': (1,1)})
-    priority3 = et.getPriority(WikiNode('Science'), {'math': (1,0.5), 'physics': (1,0.5)})
-    priority4 = et.getPriority(WikiNode('Science'), {'math': (1,0.5), 'physics': (1,0.8)})
-    assert priority1 > priority2
-    assert priority1 > priority3
-    assert priority4 > priority3
+    priority1 = et.getPriority('Science', {'math': (1,1), 'physics': (1,1)})
+    priority2 = et.getPriority('Science', {'dogs': (1,1), 'Disney': (1,1)})
+    priority3 = et.getPriority('Science', {'math': (1,0.5), 'physics': (1,0.5)})
+    priority4 = et.getPriority('Science', {'math': (1,0.5), 'physics': (1,0.8)})
+    assert priority1 < priority2
+    assert priority1 < priority3
+    assert priority4 < priority3
+    priority5 = et.getPriority('ndlsajncjxdsfjvdk', {'math':(1,1)})
+    assert priority5 == -1
     
 def testUpdateFringe():
     pass
@@ -105,4 +107,5 @@ if __name__ == "__main__":
     # testExplorationTracker()
     # testRecommender()
     # testUI()
+    testPriorityRankings()
     print("All tests pass.")

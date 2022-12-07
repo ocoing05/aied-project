@@ -73,7 +73,6 @@ class ExplorationTracker:
             self.fringe.insert(node, priority)
 
     def getPriority(self, nodeTitle, studentInterests):
-        # TODO: always returning 1.0 for some reason
         # option for future?: getKeyWords() of node and then use those to compare against studentInterests
         words = nodeTitle
         for interest in list(studentInterests.keys()):
@@ -81,13 +80,15 @@ class ExplorationTracker:
         tokens = nlp(words)
         priority = 0
         interestTokens = tokens[1:]
-        print(tokens[0])
-        print(tokens[0].has_vector)
+        # print(tokens[0])
         if tokens[0].has_vector: 
             for i in interestTokens:
-                if i.is_oov: # TODO: should always be true if we are adding to studentInterests right?
+                if i.has_vector: # TODO: should always be true if we are adding to studentInterests right?
                     x = studentInterests[i.text]
                     interestVal = x[1]
+                    # print(i)
+                    # print(tokens[0].similarity(i))
+                    # print(interestVal)
                     priority += tokens[0].similarity(i) * interestVal 
         else:
             return -1 # nodeTitle does not exist in nlp model, can not be analyzed
