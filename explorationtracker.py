@@ -13,8 +13,8 @@ class ExplorationTracker:
         self.fringe = PriorityQueue() # unopened WikiNodes adjacent to progressGraph, sorted by potential interest
         self.graph = nx.Graph() # graph of already read articles and edges between them represent from what link they were discovered
 
-        # we may not need this as a priority queue since the graph is already holding all of the visited nodes & we could add any stats needed to there?
-        self.visited = PriorityQueue() 
+        # # we may not need this as a priority queue since the graph is already holding all of the visited nodes & we could add any stats needed to there?
+        # self.visited = PriorityQueue() 
         
         for i in initialInterests:
             self.fringe.insert(WikiNode(i), 0.0)
@@ -27,18 +27,18 @@ class ExplorationTracker:
     #     # add wikiNode.fringeSet to self.fringe
     #     pass
 
-    def getVisited(self) -> set: # alternatively, this would also be all the nodes in the graph
-        return self.visited.keys()
+    # def getVisited(self) -> set: # alternatively, this would also be all the nodes in the graph
+    #     return self.visited.keys()
 
-    def _updateVisited(self, wikiNode) -> None:
-        if not wikiNode.isVisited():
-            wikiNode.setAsVisited()
-        else:
-            (elapsedTime, erosionTime, numVisits, numTests) = self.visited[wikiNode]
-            numVisits += 1
-            self.visited[wikiNode] = (elapsedTime, erosionTime, numVisits, numTests)
-        self.visited[wikiNode] = []
-        pass
+    # def _updateVisited(self, wikiNode) -> None:
+    #     if not wikiNode.isVisited():
+    #         wikiNode.setAsVisited()
+    #     else:
+    #         (elapsedTime, erosionTime, numVisits, numTests) = self.visited[wikiNode]
+    #         numVisits += 1
+    #         self.visited[wikiNode] = (elapsedTime, erosionTime, numVisits, numTests)
+    #     self.visited[wikiNode] = []
+    #     pass
 
     def updateGraph(self, node):
         '''Called by the student model update() method after a student reads a new article. 
@@ -51,7 +51,7 @@ class ExplorationTracker:
         '''Called by the student model update() method after a student reads a new article.
         Updates fringe with linked articles from node they just read. Ranked based on student interests.'''
         lp = node.linkedPages
-        kw = node.getKeyWords()
+        # kw = node.getKeyWords()
         # for pg in set(lp) & set(kw): # words that exist as both linked pages and key words of the node
          # TODO: instead of using the set of both ^ like above, maybe use keywords to rank linked pages but don't disregard completely?
         for pg in lp:
@@ -79,7 +79,7 @@ class ExplorationTracker:
         words = nodeTitle
         for interest in list(studentInterests.keys()):
             words = words + ' ' + interest
-        tokens = nlp(words) #TODO: the list separates by number too so for example "3M" would become ['3','M'] so then 'M' would be taken as the second word
+        tokens = nlp(words)
         priority = 0
         interestTokens = tokens[1:]
         # print(tokens[0])

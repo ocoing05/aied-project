@@ -9,6 +9,7 @@ class StudentModel:
         self.interestKeywords = {}  # dictionary of interest keywords, and a tuple:
                                     # first value: times updated
                                     # second value: level of interest, between -1.0 and 1.0
+                                    # TODO: determine if we want 0-1 or -1-1 and make sure all logic fits
                                     #
                                     # Level of interest is determined by:
                                     #   1. Summing values all values inputed for the specific keyword
@@ -20,10 +21,8 @@ class StudentModel:
 
         # explorationTracker contains explored graph, fringe queue, and visited queue(?)
         self.explorationTracker = ExplorationTracker(interestKeywords)
-        
-        # TODO: add initial interestKeywords as WikiNode objects to the fringe if they exist as wiki articles
 
-        # NOT FULLY IMPLEMENTED YET...
+        # NOT FULLY IMPLEMENTED...
         self.username = username # self-selected unique student identifier
         self.password = password # protecting account usage
         self.email = email # for resetting password
@@ -46,10 +45,11 @@ class StudentModel:
         self.explorationTracker.updateGraph(node)
         # update fringe queue with linked nodes
         self.explorationTracker.updateFringe(node, self.interestKeywords)
-        # update student interests based on the article
+        # update student interests based on the article (TODO: old logic -> delete)
         # self.updateInterests(node)
 
-    # TODO: how to best make sure these are ranked accordingly with already present kws? maybe actually update ALL interest values not just new?
+    # interests are now based purely on student input... probably delete this old logic later
+    # how to best make sure these are ranked accordingly with already present kws? maybe actually update ALL interest values not just new?
     # def updateInterests(self, node):
     #     # for the WikiNode article they just read, update interests of keywords accordingly
     #     kw = node.getKeyWords()
