@@ -71,9 +71,9 @@ class ExplorationTracker:
             if priority == -1: 
                 continue # ignore if does not exist in spacy nlp model
             # print(priority)
-            try: # TODO: ideally this wouldn't be needed, but an error was coming up from MediaWiki for some titles
+            try: 
                 node = WikiNode(pg, node.title)
-            except:
+            except: # ignore if MediaWiki can't identify which article should be used for this title
                 continue
             print(node.title, priority)
             self.fringe.insert(node, priority)
@@ -83,6 +83,7 @@ class ExplorationTracker:
         words = nodeTitle
         for interest in list(studentInterests.keys()):
             words = words + ' ' + interest
+        print(words)
         tokens = nlp(words)
         priority = 0
         interestTokens = tokens[1:]
