@@ -107,5 +107,4 @@ if __name__ == "__main__":
     # testExplorationTracker()
     # testRecommender()
     # testUI()
-    testPriorityRankings()
     print("All tests pass.")

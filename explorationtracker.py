@@ -17,7 +17,11 @@ class ExplorationTracker:
         # self.visited = PriorityQueue() 
         
         for i in initialInterests:
-            self.fringe.insert(WikiNode(i), 0.0)
+            try:
+                self.fringe.insert(WikiNode(i), 0.0) 
+            except: 
+                # don't add this interest if MediaWiki can't identify the correct article to use
+                continue
 
     # i don't think we need this since all update methods are called from student object but keeping it for rn just in case ?
     # def update(self, wikiNode) -> None:
