@@ -83,20 +83,20 @@ class ExplorationTracker:
         words = nodeTitle
         for interest in list(studentInterests.keys()):
             words = words + ' ' + interest
-        print(words)
+        # print(words)
         tokens = nlp(words)
         priority = 0
         interestTokens = tokens[1:]
         # print(tokens[0])
         if tokens[0].has_vector: 
             for i in interestTokens:
-                if i.has_vector: # TODO: should always be true if we are adding to studentInterests right?
-                    x = studentInterests[i.text]
-                    interestVal = x[1]
-                    # print(i)
-                    # print(tokens[0].similarity(i))
-                    # print(interestVal)
-                    priority += tokens[0].similarity(i) * interestVal 
+                #if i.has_vector: # TODO: should always be true ... delete later
+                x = studentInterests[i.text]
+                interestVal = x[1]
+                # print(i)
+                # print("similarity", tokens[0].similarity(i))
+                # print("interest", interestVal)
+                priority += (tokens[0].similarity(i)+1)*0.5 * interestVal # similarity() => -1 to 1
         else:
             return -1 # nodeTitle does not exist in nlp model, can not be analyzed
         return (1 - priority / len(interestTokens))
