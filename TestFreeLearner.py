@@ -111,19 +111,20 @@ def testUI():
 # *** spacy and sense2vec ***
 def testSpacy():
 
-    doc = s2vNLP("A sentence about natural language processing.")
-    assert doc[3:6].text == "natural language processing"
-    freq = doc[3:6]._.s2v_freq
-    vector = doc[3:6]._.s2v_vec
-    most_similar = doc[3:6]._.s2v_most_similar(3)
-    print(freq)
-    print(most_similar)
+    # doc = s2vNLP("A sentence about natural language processing.")
+    # assert doc[3:6].text == "natural language processing"
+    # freq = doc[3:6]._.s2v_freq
+    # vector = doc[3:6]._.s2v_vec
+    # most_similar = doc[3:6]._.s2v_most_similar(3)
+    # print(freq)
+    # print(most_similar)
 
-    doc = s2vNLP("A sentence about Facebook and Google.")
-    for ent in doc.ents:
-        assert ent._.in_s2v
-        most_similar = ent._.s2v_most_similar(3)
-    print(most_similar)
+    # doc = s2vNLP("A sentence about Facebook and Google.")
+    # for ent in doc.ents:
+    #     assert ent._.in_s2v
+    #     most_similar = ent._.s2v_most_similar(3)
+    # print(most_similar
+    pass
 
 def testMediaWiki():
     """Testing:
