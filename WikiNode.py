@@ -13,16 +13,25 @@ class WikiNode:
     def __init__(self, title, prevNode = None):
 
         self.wikipedia = MediaWiki()
-        self.wikipedia.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone' # MediaWiki etiquette
+        self.wikipedia.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone_qharring@macalester.edu' # MediaWiki etiquette
 
         self.title = title
 
         # the article they read previously to get this suggestion
         self.prevNode = prevNode
 
-        self.page = self.wikipedia.page(title)
+        # Should allow new wikiNode object to be created without DisabmiguationError
+        suggestedTitle = self.wikipedia.suggest(title)
+        if suggestedTitle:
+            self.page = self.wikipedia.page(suggestedTitle)
         self.linkedPages = self.page.links
         self.keywords = []
+
+    def getLinkedPageTitles(self):
+        return self.linkedPages
+
+    def getTitle(self):
+        return self.title
 
     def getURL(self):
         return "https://en.wikipedia.org/wiki/" + self.title

@@ -37,6 +37,9 @@ class StudentModel:
     def getInterestKeywords(self) -> set:
         return self.interestKeywords.keys()
 
+    def getFringe(self, numNodes) -> list:
+        return self.explorationTracker.getFringe(numNodes)
+
     def updateModel(self, node) -> None:
         '''Called when the student reads a new article.
             Updates progress graph, student interest dictionary, and fringe queue.

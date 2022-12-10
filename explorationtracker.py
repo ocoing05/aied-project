@@ -20,6 +20,16 @@ class ExplorationTracker:
                 # don't add this interest if MediaWiki can't identify the correct article to use
                 continue
 
+    def getFringe(self, numNodes) -> list:
+        
+        fringeList = []
+        tempFringeQueue = self.fringe
+        for x in range(1,numNodes):
+            node = tempFringeQueue.delete()
+            fringeList.append(node)
+
+        return fringeList
+
     def updateGraph(self, node):
         '''Called by the student model update() method after a student reads a new article. 
         Adds node to graph.'''

@@ -1,11 +1,20 @@
 from studentmodel import StudentModel
 from wikinode import WikiNode
 from explorationtracker import ExplorationTracker
+from mediawiki import MediaWiki
+import spacy
+from sense2vec import Sense2Vec, Sense2VecComponent
+import yake
 
 # *** MOCK DATA ***
 
 # create students
 student1 = StudentModel("Ingrid", "ingrid", "12345", "ioconnor@macalester.edu", ["Disney", "Dinosaurs", "Volcanoes"])
+student2 = StudentModel("Quentin Harrington", 
+                        "quentinroyal", 
+                        "password",
+                        "qharring@macalester.edu", 
+                        ["Computers", "Sustainability", "Ecology", "Soccer", "Urbanism", "Architecture", "Plants", "Psychology"])
 
 # create articles
 article1 = WikiNode("Disney")
@@ -99,12 +108,112 @@ def testRecommender():
 def testUI():
     pass
 
+# *** spacy and sense2vec ***
+def testSpacy():
+
+    doc = s2vNLP("A sentence about natural language processing.")
+    assert doc[3:6].text == "natural language processing"
+    freq = doc[3:6]._.s2v_freq
+    vector = doc[3:6]._.s2v_vec
+    most_similar = doc[3:6]._.s2v_most_similar(3)
+    print(freq)
+    print(most_similar)
+
+    doc = s2vNLP("A sentence about Facebook and Google.")
+    for ent in doc.ents:
+        assert ent._.in_s2v
+        most_similar = ent._.s2v_most_similar(3)
+    print(most_similar)
+
+def testMediaWiki():
+    """Testing:
+        1. For each articleTitle:
+            a. Initialize wikiNode for page
+            b. Initialize spacy doc for page title
+            c. Initialize spacy doc for page summary
+            d. Build dictionary of links and their similarity to summary, normalized to title <-> summary similarity
+                1. 
+
+    """
+
+    wikipedia = MediaWiki()
+
+    # create natural language processing elements
+    # controlNLP = spacy.load("en_core_web_lg")
+    s2vNLP = spacy.load("en_core_web_lg")
+    s2v = s2vNLP.add_pipe("sense2vec")
+    s2v.from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
+
+    randomArticles = {} # Dictionary of random article titles (keys) and their links sorted by (values)
+    for articleTitle in ["FIFA World Cup", "ambulatory", "ducks", "internet", "United States Department of Defense", "urban planning"]:
+        print("======================")
+        print("Title: " + articleTitle)
+        wikiNode = WikiNode(articleTitle)
+        summary = wikiNode.getSummary()
+        titleDoc = s2vNLP(articleTitle)
+        summaryDoc = s2vNLP(summary)
+        print(titleDoc.similarity(summaryDoc))
+
+        # titleToken = s2vNLP(articleTitle)._.s2v_phrases
+        # if len(titleToken) != 1:
+        #     break
+        # print(titleToken)
+
+        # summaryTokens_withDup = s2vNLP(summary)._.s2v_phrases
+        # summaryTokens = []
+        # for token in summaryTokens_withDup:
+        #     if token in summaryTokens:
+        #         continue
+        #     else:
+        #         summaryTokens.append(token)
+        
+
+        # print(summaryTokens)
+
+
+        # linkSimDict = {} 
+        # links = wikiNode.getLinkedPageTitles
+        # for link in links:
+        #     linkDoc = s2vNLP(link)
+        # UAWords = []
+        # for token in doc:
+        #     if token.is_alpha and not token.is_oov and not token.is_stop and token.text not in UAWords:
+        #         UAWords.append(token.text)
+        # print(UAWords)
+        # print("======================")
+        
+        
+        # links = wikiNode.getLinkedPageTitles
+        # links.sort(key=_sortFunc)
+        # randomArticles[wikiNode] = links
+
+def _sortFunc():
+    # text = self.getContent()
+    language = "en"
+    max_ngram_size = 1 # only 1-gram so that spacy can work
+    deduplication_threshold = 0.1 # set to 0.1 to prohibit repeated words in key words
+    numOfKeywords = 100
+    extractor = yake.KeywordExtractor(
+        lan=language, 
+        n=max_ngram_size, 
+        dedupLim=deduplication_threshold, 
+        top=numOfKeywords, 
+        features=None)
+    # tuples = extractor.extract_keywords(text)
+    # keywords = [i[0] for i in tuples]
+    # self.keywords = keywords
+    # return keywords
+    pass
+
 # *** RUN TESTS ***
 
 if __name__ == "__main__":
+
     # testWikiNodes()
     # testStudentModel()
     # testExplorationTracker()
     # testRecommender()
     # testUI()
+    # testSpacy()
+    testMediaWiki()
     print("All tests pass.")
