@@ -13,7 +13,7 @@ class WikiNode:
     def __init__(self, title, prevNode = None):
 
         self.wikipedia = MediaWiki()
-        self.wikipedia.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone' # MediaWiki ettiquete
+        self.wikipedia.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone' # MediaWiki etiquette
 
         self.title = title
 
@@ -47,7 +47,7 @@ class WikiNode:
             text = self.getContent()
             language = "en"
             max_ngram_size = 1 # only 1-gram so that spacy can work
-            deduplication_threshold = 0.9 # set to 0.1 to prohibit repeated words in key words
+            deduplication_threshold = 0.1 # set to 0.1 to prohibit repeated words in key words
             numOfKeywords = 100
             extractor = yake.KeywordExtractor(
                 lan=language, 
@@ -63,8 +63,6 @@ class WikiNode:
     def getSectionTitles(self):
         return self.page.sections
     
-    # moved out of init method bc we don't want to generate this upon all node initializations, 
-    # since some nodes may be created for fringe but never read, so all this data doesn't need to be found/saved in that case
     def getSection(self, section):
         if section not in self.page.sections:
             return ("No section titled ", section)

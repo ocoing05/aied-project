@@ -9,7 +9,7 @@ class StudentModel:
         self.interestKeywords = {}  # dictionary of interest keywords, and a tuple:
                                     # first value: times updated
                                     # second value: level of interest, between -1.0 and 1.0
-                                    # TODO: determine if we want 0-1 or -1-1 and make sure all logic fits
+                                # TODO: determine if we want 0-1 or -1-1 and make sure all logic fits
                                     #
                                     # Level of interest is determined by:
                                     #   1. Summing values all values inputed for the specific keyword
@@ -45,16 +45,6 @@ class StudentModel:
         self.explorationTracker.updateGraph(node)
         # update fringe queue with linked nodes
         self.explorationTracker.updateFringe(node, self.interestKeywords)
-        # update student interests based on the article (TODO: old logic -> delete)
-        # self.updateInterests(node)
-
-    # interests are now based purely on student input... probably delete this old logic later
-    # how to best make sure these are ranked accordingly with already present kws? maybe actually update ALL interest values not just new?
-    # def updateInterests(self, node):
-    #     # for the WikiNode article they just read, update interests of keywords accordingly
-    #     kw = node.getKeyWords()
-    #     for i in range(len(kw)):
-    #         self.updateInterestKeyword(kw[i], len(kw)-i/len(kw)) # first keywords in list get high interest. 0-1 interest levels here
 
     def updateInterestKeyword(self, keyword, newInterestValue) -> None:
         """This function is called when a new interest value is retrieved,

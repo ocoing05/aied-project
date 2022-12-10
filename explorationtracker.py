@@ -12,9 +12,6 @@ class ExplorationTracker:
     def __init__(self, initialInterests) -> None:
         self.fringe = PriorityQueue() # unopened WikiNodes adjacent to progressGraph, sorted by potential interest
         self.graph = nx.Graph() # graph of already read articles and edges between them represent from what link they were discovered
-
-        # # we may not need this as a priority queue since the graph is already holding all of the visited nodes & we could add any stats needed to there?
-        # self.visited = PriorityQueue() 
         
         for i in initialInterests:
             try:
@@ -22,27 +19,6 @@ class ExplorationTracker:
             except: 
                 # don't add this interest if MediaWiki can't identify the correct article to use
                 continue
-
-    # i don't think we need this since all update methods are called from student object but keeping it for rn just in case ?
-    # def update(self, wikiNode) -> None:
-    #     self._updateVisited(wikiNode)
-    #     # self.visited[wikiNode] = [listOfSpecialKeywords]
-    #     # if self.fringe contains wikiNode, remove it
-    #     # add wikiNode.fringeSet to self.fringe
-    #     pass
-
-    # def getVisited(self) -> set: # alternatively, this would also be all the nodes in the graph
-    #     return self.visited.keys()
-
-    # def _updateVisited(self, wikiNode) -> None:
-    #     if not wikiNode.isVisited():
-    #         wikiNode.setAsVisited()
-    #     else:
-    #         (elapsedTime, erosionTime, numVisits, numTests) = self.visited[wikiNode]
-    #         numVisits += 1
-    #         self.visited[wikiNode] = (elapsedTime, erosionTime, numVisits, numTests)
-    #     self.visited[wikiNode] = []
-    #     pass
 
     def updateGraph(self, node):
         '''Called by the student model update() method after a student reads a new article. 
