@@ -59,9 +59,9 @@ class StudentModel:
         # update interest level in interestKeywords list
         else:
             (timesUpdated, interestLevel) = self.interestKeywords[keyword]
-
+            scaledInterestLevel = interestLevel * timesUpdated
             newTimesUpdated = timesUpdated + 1
-            newInterestLevel = (interestLevel + newInterestValue)/newTimesUpdated 
+            newInterestLevel = (scaledInterestLevel + newInterestValue)/newTimesUpdated
             self.interestKeywords[keyword.lower()] = (newTimesUpdated, newInterestLevel)
 
             # ---------------------------------------------------------------------------
