@@ -43,7 +43,8 @@ class ExplorationTracker:
         lp = node.linkedPages
         # kw = node.getKeyWords()
         # for pg in set(lp) & set(kw): # words that exist as both linked pages and key words of the node
-         # TODO: instead of using the set of both ^ like above, maybe use keywords to rank linked pages but don't disregard completely?
+        # TODO: instead of using the set of both ^ like above, maybe use keywords to rank linked pages but don't disregard completely?
+        # maybe something like that ^ but use similarity between kw and lp? prioritize the ones where similarity is greatest
         for pg in lp:
             # print(pg)
             if self.alreadyExplored(pg): # that article was already read
