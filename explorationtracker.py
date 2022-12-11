@@ -29,6 +29,25 @@ class GraphTracker():
         else:
             return False
 
+    def getFringe(self, numNodes) -> list:
+
+        fringeList = []
+        tempFringeQueue = self.fringe
+        for x in range(1,numNodes):
+            node = tempFringeQueue.delete()
+            fringeList.append(node)
+
+        return fringeList
+
+    def shortenFringe(self, num) -> None:
+        '''Deletes num nodes from the end of the queue.'''
+        fringeItems = self.getFringe(self.fringe.size)
+        keep = self.fringe.size - num # number of nodes to keep
+        for i in range(self.fringe.size):
+            if i > keep:
+                self.fringe.removeValue(fringeItems[i])
+
+
 class ExplorationTracker(GraphTracker):
 
     def __init__(self, initialInterests) -> None:
@@ -41,16 +60,6 @@ class ExplorationTracker(GraphTracker):
             except: 
                 # don't add this interest if MediaWiki can't identify the correct article to use
                 continue
-
-    def getFringe(self, numNodes) -> list:
-
-        fringeList = []
-        tempFringeQueue = self.fringe
-        for x in range(1,numNodes):
-            node = tempFringeQueue.delete()
-            fringeList.append(node)
-
-        return fringeList
 
     def updateFringe(self, node, studentInterests):
         '''Called by the student model update() method after a student reads a new article.

@@ -31,8 +31,8 @@ def getArticles(student):
     print('Here are your options: ')
     for i in range(len(suggestions)):
         option = suggestions[i]
-        priority = option[1]
         node = option[0]
+        priority = option[1]
         print(i, ": ", node.title, " ", priority)
     choice = input('Which article would you like to read? ')
     currArticle = suggestions.pop(int(choice))[0] # take chosen article out of suggestions list
@@ -64,6 +64,7 @@ def getArticles(student):
 def createInterestList(str):
     return str.split(',')
 
+# TODO: use getFringe() function instead
 # TODO : would probably be better to do this without removing the elements from fringe, so we wouldn't have to put them back later...
 # but not sure how to do that bc firstElement() or peek() are only for seeing the first element...
 def getTopSuggestions(num, fringe):
