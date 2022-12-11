@@ -57,13 +57,14 @@ class ExplorationTracker(GraphTracker):
         for i in initialInterests:
             try:
                 self.fringe.insert(WikiNode(i), 0.0) 
-            except: 
-                # don't add this interest if MediaWiki can't identify the correct article to use
+            except: # don't add this interest if MediaWiki can't identify the correct article to use
                 continue
 
     def updateFringe(self, node, studentInterests):
         '''Called by the student model update() method after a student reads a new article.
         Updates fringe with linked articles from node they just read. Ranked based on student interests.'''
+        if self.fringe.size > 30:
+            self.shortenFringe(self.fringe.size / 2) # cut fringe size in half
         lp = node.linkedPages
         # kw = node.getKeyWords()
         # for pg in set(lp) & set(kw): # words that exist as both linked pages and key words of the node
