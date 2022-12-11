@@ -8,8 +8,7 @@ class StudentModel:
 
         self.interestKeywords = {}  # dictionary of interest keywords, and a tuple:
                                     # first value: times updated
-                                    # second value: level of interest, between -1.0 and 1.0
-                                # TODO: determine if we want 0-1 or -1-1 and make sure all logic fits
+                                    # second value: level of interest, between 0.0 and 1.0
                                     #
                                     # Level of interest is determined by:
                                     #   1. Summing values all values inputed for the specific keyword
