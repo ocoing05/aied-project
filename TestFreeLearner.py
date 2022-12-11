@@ -129,31 +129,90 @@ def testSpacy():
 def testMediaWiki():
     """Testing:
         1. For each articleTitle:
-            a. Initialize wikiNode for page
-            b. Initialize spacy doc for page title
+            a. Initialize wikiNode
+            b. Initialize spacy doc for articleTitle
             c. Initialize spacy doc for page summary
             d. Build dictionary of links and their similarity to summary, normalized to title <-> summary similarity
                 1. 
-
     """
+    # debug variable, prints debugging statements if True
+    debug = True
 
-    wikipedia = MediaWiki()
+    # Function for debugging
+    def _debugFunc(debugPrintDict, key):
+        print(debugPrintDict.get(key)) if debug else debugPrintDict
+        return debugPrintDict
 
+    # Dictionary of ordered debugging statements
+    debugDict = {1:("loading MediaWiki object..."),
+                      2:("loaded as wikipedia."),
+                      3:("loading spacy NLP..."),
+                      4:("attaching sense2vec pipe..."),
+                      5:("loaded s2vNLP. Beginning article analysis loop."),
+                      6:("building WikiNode object..."),
+                      7:("WikiNode built. creating s2vNLP doc objects for WikiNode title, summary, and links...")}
+
+    debugDict = _debugFunc(debugDict, 1) # if debug variable at top of file is True, print debugging string
+
+    # wikipedia = MediaWiki()
+
+    debugDict = _debugFunc(debugDict, 2) # 2
+
+    filePath = input("\nCopy in the full path to your vector data folder. \
+                      \ni.e. '/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg' \
+                      \n    --> ")
     # create natural language processing elements
     # controlNLP = spacy.load("en_core_web_lg")
+
+    debugDict = _debugFunc(debugDict, 3) # 3
+
     s2vNLP = spacy.load("en_core_web_lg")
+
+    debugDict = _debugFunc(debugDict, 4) # 4
+
     s2v = s2vNLP.add_pipe("sense2vec")
-    s2v.from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
+    s2v.from_disk(filePath)
+
+    debugDict = _debugFunc(debugDict, 5) # 5
 
     randomArticles = {} # Dictionary of random article titles (keys) and their links sorted by (values)
-    for articleTitle in ["FIFA World Cup", "ambulatory", "ducks", "internet", "United States Department of Defense", "urban planning"]:
+    for articleTitle in ["FIFA World Cup", "internet", "United States Department of Defense", "urban planning"]:
         print("======================")
         print("Title: " + articleTitle)
+
+        debugDict = _debugFunc(debugDict, 6) # 6
+
         wikiNode = WikiNode(articleTitle)
-        summary = wikiNode.getSummary()
+
+        debugDict = _debugFunc(debugDict, 7) # 7
+
         titleDoc = s2vNLP(articleTitle)
-        summaryDoc = s2vNLP(summary)
-        print(titleDoc.similarity(summaryDoc))
+        summaryDoc = s2vNLP(wikiNode.getSummary())
+        
+        print("title <-> summary similarity: ", titleDoc.similarity(summaryDoc))
+        
+        # for link in wikiNode.getLinkedPageTitles:
+        #     linkDoc = s2vNLP(link)
+        #     if len(linkDoc) == 1: # This means the full linked page title has a vector in the sense2vec pipe, usable for similarity
+        #         linkToken = linkDoc._.s2v_phrases
+        #         linkSimDict[linkToken] = linkToken.
+        # linksDoc = 
+        # linkSimDict = {} 
+        # for link in linksDoc:
+            
+        # for link in links:
+        #     if
+        #     linkDoc = s2vNLP(link)
+        # UAWords = []
+        # for token in doc:
+        #     if token.is_alpha and not token.is_oov and not token.is_stop and token.text not in UAWords:
+        #         UAWords.append(token.text)
+        # print(UAWords)
+        # print("======================")
+
+        # links = wikiNode.getLinkedPageTitles
+        # links.sort(key=_sortFunc)
+        # randomArticles[wikiNode] = links
 
         # titleToken = s2vNLP(articleTitle)._.s2v_phrases
         # if len(titleToken) != 1:
@@ -170,23 +229,6 @@ def testMediaWiki():
         
 
         # print(summaryTokens)
-
-
-        # linkSimDict = {} 
-        # links = wikiNode.getLinkedPageTitles
-        # for link in links:
-        #     linkDoc = s2vNLP(link)
-        # UAWords = []
-        # for token in doc:
-        #     if token.is_alpha and not token.is_oov and not token.is_stop and token.text not in UAWords:
-        #         UAWords.append(token.text)
-        # print(UAWords)
-        # print("======================")
-        
-        
-        # links = wikiNode.getLinkedPageTitles
-        # links.sort(key=_sortFunc)
-        # randomArticles[wikiNode] = links
 
 def _sortFunc():
     # text = self.getContent()

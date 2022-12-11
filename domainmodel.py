@@ -1,7 +1,7 @@
 
 
 import yake
-import networkx as nx
+from explorationtracker import DomainTracker
 from FoxQueue import PriorityQueue
 from wikinode import WikiNode
 from mediawiki import MediaWiki
@@ -9,7 +9,8 @@ from owlready2 import *
 
 class DomainModel:
     
-    def __init__(self) -> None:
+    def __init__(self, initialInterests) -> None:
+        self.domainTracker = DomainTracker(initialInterests)
         pass
 
 if __name__ == "__main__":

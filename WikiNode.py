@@ -10,7 +10,9 @@ from mediawiki import MediaWiki
 
 class WikiNode:
 
-    def __init__(self, title, prevNode = None):
+    def __init__(self, title, prevNode = None, domainNode=False):
+
+        self.domainNode = domainNode
 
         self.wikipedia = MediaWiki()
         self.wikipedia.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone_qharring@macalester.edu' # MediaWiki etiquette
@@ -24,8 +26,18 @@ class WikiNode:
         suggestedTitle = self.wikipedia.suggest(title)
         if suggestedTitle:
             self.page = self.wikipedia.page(suggestedTitle)
+            self.title = suggestedTitle
         self.linkedPages = self.page.links
         self.keywords = []
+
+        if domainNode:
+            self.parents = [] 
+            self.children = []
+            self.siblings = []
+            # knownPeers are articles outside the family (not in parents, children or siblings) 
+            # with high maxVal of (titleSim, keywordSim, linksSim) "wormholes" to other domains.
+            # Find knownPeers by running s2v_most_similar on title, keep 
+            self.knownPeers = [] 
 
     def getLinkedPageTitles(self):
         return self.linkedPages

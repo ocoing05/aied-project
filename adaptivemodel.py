@@ -11,16 +11,12 @@ import spacy
 
 class AdaptiveModel:
     
-    def __init__(self) -> None:
-        
-        self.studentModel = None
-        self.recommendations = {} # dictionary of WikiNodes and a value between 0 and 1, indicating quality
-
-    def setStudentModel(self, studentModel) -> None:
+    def __init__(self, studentModel, domainModel) -> None:
         
         self.studentModel = studentModel
-
-
+        self.domainModel = domainModel
+        self.recommendations = {} # dictionary of WikiNodes and a value between 0 and 1, indicating quality
+    
     def getRecommendations(self) -> list:
 
         if (self.studentModel == None):
@@ -28,16 +24,6 @@ class AdaptiveModel:
             return []
         else:
             return self.recommendations.keys()
-
-    def generateNewRecommendations(self) -> None:
-        
-        if (self.studentModel == None):
-            # error: no studentModel loaded
-            pass
-        else:
-            
-            # self.studentModel.getFringe
-            pass
 
 # Notes:
 

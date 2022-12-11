@@ -4,14 +4,36 @@ import re
 
 from FoxQueue import PriorityQueue
 from wikinode import WikiNode
+from mediawiki import MediaWiki
+
 
 nlp = spacy.load('en_core_web_lg')
 
-class ExplorationTracker:
+class GraphTracker():
+
+    def __init__(self) -> None:
+
+        self.graph = nx.Graph() # graph of already read articles and edges between them represent from what link they were discovered
+        self.fringe = PriorityQueue() # unopened WikiNodes adjacent to progressGraph, sorted by potential interest
+
+    def updateGraph(self, node):
+        '''Called by the student model update() method after a student reads a new article. 
+        Adds node to graph.'''
+        self.graph.add_node(node.title)
+        if node.prevNode:
+            self.graph.add_edge(node.title, node.prevNode)
+
+    def alreadyExplored(self, title):
+        if title in list(self.graph.nodes):
+            return True
+        else:
+            return False
+
+class ExplorationTracker(GraphTracker):
 
     def __init__(self, initialInterests) -> None:
-        self.fringe = PriorityQueue() # unopened WikiNodes adjacent to progressGraph, sorted by potential interest
-        self.graph = nx.Graph() # graph of already read articles and edges between them represent from what link they were discovered
+
+        super().__init__()
         
         for i in initialInterests:
             try:
@@ -21,7 +43,7 @@ class ExplorationTracker:
                 continue
 
     def getFringe(self, numNodes) -> list:
-        
+
         fringeList = []
         tempFringeQueue = self.fringe
         for x in range(1,numNodes):
@@ -29,13 +51,6 @@ class ExplorationTracker:
             fringeList.append(node)
 
         return fringeList
-
-    def updateGraph(self, node):
-        '''Called by the student model update() method after a student reads a new article. 
-        Adds node to graph.'''
-        self.graph.add_node(node.title)
-        if node.prevNode:
-            self.graph.add_edge(node.title, node.prevNode)
 
     def updateFringe(self, node, studentInterests):
         '''Called by the student model update() method after a student reads a new article.
@@ -87,11 +102,23 @@ class ExplorationTracker:
             return -1 # nodeTitle does not exist in nlp model, can not be analyzed
         return (1 - priority / len(interestTokens))
 
-    def alreadyExplored(self, title):
-        if title in list(self.graph.nodes):
-            return True
-        else:
-            return False
+class DomainTracker(GraphTracker):
+
+    def __init__(self, initialInterests) -> None:
+
+        super().__init__()
+
+        wikipedia = MediaWiki()
+        for i in initialInterests:
+            node = WikiNode(i)
+            self.updateGraph(node)
+            catTree = wikipedia.categorytree(node.getTitle, 2)
+            for subCat in catTree['category']['sub-categories']:
+                subCatNode = WikiNode(subCat, prevNode=node)
+                self.updateGraph(subCatNode)
+                subCatDict = catTree['category']['sub-categories'][subCat]
+                node.getKeyWords()
+
 
 if __name__ == "__main__":
 
