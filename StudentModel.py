@@ -63,13 +63,3 @@ class StudentModel:
             newTimesUpdated = timesUpdated + 1
             newInterestLevel = (scaledInterestLevel + newInterestValue)/newTimesUpdated
             self.interestKeywords[keyword.lower()] = (newTimesUpdated, newInterestLevel)
-
-            # ---------------------------------------------------------------------------
-            # Alternative logic: each interestLevel instance has equal weight
-
-            # (timesUpdated, interestLevel) = self.interestKeywords[keyword]
-            # scaledInterestLevel = interestLevel * timesUpdated
-            # newTimesUpdated = timesUpdated + 1
-            # newInterestLevel = (scaledInterestLevel + newInterestValue)/newTimesUpdated
-            # self.interestKeywords[keyword.lower()] = (newTimesUpdated, newInterestLevel)
-            # ---------------------------------------------------------------------------
