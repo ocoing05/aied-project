@@ -29,6 +29,7 @@ class StudentModel:
         currentSession = None 
         statsBySession = [] # List of sessionStats objects, helps build progress reports for students and teachers
 
+        ###
 
     def getStudentName(self) -> str:
         return self.studentName

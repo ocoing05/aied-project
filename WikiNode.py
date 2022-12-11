@@ -4,7 +4,7 @@ Includes title, url, summary, categories, linked pages, and content of page.
 Uses NLP on content to determine key words, which are used by recommender system.
 """
 
-# import wikipedia
+import wikipedia
 import yake
 from mediawiki import MediaWiki
 
