@@ -2,7 +2,7 @@
 Runs MVP of FreeLearner
 '''
 
-from adaptivemodel import AdaptiveModel
+# from adaptivemodel import AdaptiveModel
 from studentmodel import StudentModel
 
 def runFreeLearnerMVP():
@@ -25,7 +25,7 @@ def runFreeLearnerMVP():
 
 def getArticles(student):
     '''Get new options and print URL of the chosen article. Returns updated student.'''
-    suggestions = getTopSuggestions(3, student.explorationTracker.fringe)
+    suggestions = student.explorationTracker.getFringe(3)
     if len(suggestions) == 0:
         return 0
     print('Here are your options: ')
@@ -35,11 +35,8 @@ def getArticles(student):
         priority = option[1]
         print(i, ": ", node.title, " ", priority)
     choice = input('Which article would you like to read? ')
-    currArticle = suggestions.pop(int(choice))[0] # take chosen article out of suggestions list
-
-    # put unselected suggestions back into fringe queue
-    for s in suggestions:
-        student.explorationTracker.fringe.insert(s[0],s[1])
+    currArticle = suggestions.pop(int(choice))[0]
+    student.explorationTracker.fringe.removeValue(currArticle) # remove currArticle from fringe
 
     print(currArticle.getURL())
     # TODO: print section by section content rather than URL ?
@@ -63,18 +60,6 @@ def getArticles(student):
 
 def createInterestList(str):
     return str.split(',')
-
-# TODO: use getFringe() function instead
-# TODO : would probably be better to do this without removing the elements from fringe, so we wouldn't have to put them back later...
-# but not sure how to do that bc firstElement() or peek() are only for seeing the first element...
-def getTopSuggestions(num, fringe):
-    # num = number of suggestions to get
-    suggestions = []
-    for n in range(num):
-        s = fringe.delete()
-        if (s is not None):
-            suggestions.append(s)
-    return suggestions
 
 if __name__ == "__main__":
     runFreeLearnerMVP()

@@ -100,6 +100,9 @@ def testPriorityRankings():
 def testUpdateFringe():
     pass
 
+def testShortenFringe():
+    pass
+
 # *** Recommender ***
 def testRecommender():
     pass
