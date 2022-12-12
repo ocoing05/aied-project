@@ -2,23 +2,22 @@
 Runs MVP of FreeLearner
 '''
 
-# from adaptivemodel import AdaptiveModel
-from studentmodel import StudentModel
+from adaptivemodel import AdaptiveModel
 
 def runFreeLearnerMVP():
     print('Welcome to FreeLearner!')
     name = input('What is your name? ')
     print('Hi, ', name, '!')
     print('Please write a list of things that you would like to learn about.')
-    print('This list should be separated by commas but no spaces, like this: Dinosaurs,Science,Disney')
+    print('This list should be separated by commas but no spaces, like this: dinosaurs,science,disney')
     interestStr = input('What are your interests? \n')
-    student = StudentModel(name, '', '', '', createInterestList(interestStr))
+    adaptiveModel = (name, createInterestList(interestStr))
     while True:
         cmd = input('Type n to get a new suggestion or q to quit FreeLearner: ')
         if cmd == 'q':
             break
-        student = getArticles(student)
-        if student == 0:
+        suggestions = adaptiveModel.getArticles()
+        if suggestions == 0:
             print("No suggestions.")
             break
 
@@ -58,7 +57,7 @@ def getArticles(student):
     return student
 
 def createInterestList(str):
-    return str.split(',')
+    return str.lower().split(',')
 
 if __name__ == "__main__":
     runFreeLearnerMVP()

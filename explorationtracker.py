@@ -1,18 +1,19 @@
 import networkx as nx
 import spacy
 import re
+import sense2vec
 
 from FoxQueue import PriorityQueue
 from wikinode import WikiNode
 from mediawiki import MediaWiki
 
-
-nlp = spacy.load('en_core_web_lg')
+# load nlp and add sense2vec multiword phrase vector pipe
 
 class GraphTracker():
 
-    def __init__(self) -> None:
+    def __init__(self, nlp) -> None:
 
+        self.nlp = nlp # natural language processor 
         self.graph = nx.Graph() # graph of already read articles and edges between them represent from what link they were discovered
         self.fringe = PriorityQueue() # unopened WikiNodes adjacent to progressGraph, sorted by potential interest
 
@@ -51,9 +52,9 @@ class GraphTracker():
 
 class ExplorationTracker(GraphTracker):
 
-    def __init__(self, initialInterests) -> None:
+    def __init__(self, nlp, initialInterests) -> None:
 
-        super().__init__()
+        super().__init__(nlp)
         
         for i in initialInterests:
             try:
@@ -66,20 +67,31 @@ class ExplorationTracker(GraphTracker):
         Updates fringe with linked articles from node they just read. Ranked based on student interests.'''
         if self.fringe.size > 30:
             self.shortenFringe(self.fringe.size / 2) # cut fringe size in half
-        lp = node.linkedPages
-        # kw = node.getKeyWords()
+        linkedPageTitles = node.getLinkedPageTitles()
+        kwTokens = self.nlp(node.getKeyWords())._.s2v_phrases
+        sortedLinks = {} # linkedPageTitles (keys) sorted by their average s2v similarity to all node keywords
+
+        for link in linkedPageTitles:
+            linkDoc = self.nlp(link)
+            if len(linkDoc) == 1: 
+                for kwToken in kwTokens:
+                    sim = 0
+
         # for pg in set(lp) & set(kw): # words that exist as both linked pages and key words of the node
         # TODO: instead of using the set of both ^ like above, maybe use keywords to rank linked pages but don't disregard completely?
         # maybe something like that ^ but use similarity between kw and lp? prioritize the ones where similarity is greatest
-        for pg in lp:
+        for pg in linkedPageTitles:
             # print(pg)
             if self.alreadyExplored(pg): # that article was already read
                 continue
             pg = re.sub(r'\W+', ' ', pg) # replaces all non-alphanumeric/underscore characters w space
-            if len(pg.strip().split(" ")) > 1 or not pg.isalpha(): # more than 1-gram phrases and non-letters will mess up spacy's analysis
-               # TODO: logic for n-gram pages?
-               # print("n-gram")
-               continue
+
+            # Shouldn't need to split page title with sense2vec loaded
+            # if len(pg.strip().split(" ")) > 1 or not pg.isalpha(): # more than 1-gram phrases and non-letters will mess up spacy's analysis
+            #    # TODO: logic for n-gram pages?
+            #    # print("n-gram")
+            #    continue
+
             priority = self.getPriority(pg, studentInterests)
             if priority == -1: 
                 continue # ignore if does not exist in spacy nlp model
@@ -92,44 +104,68 @@ class ExplorationTracker(GraphTracker):
             self.fringe.insert(node, priority)
 
     def getPriority(self, nodeTitle, studentInterests):
-        # option for future?: getKeyWords() of node and then use those to compare against studentInterests
-        words = nodeTitle
+
+        totalSim = 0
+        nodeDoc = self.nlp(nodeTitle)
+
         for interest in list(studentInterests.keys()):
-            words = words + ' ' + interest
-        # print(words)
-        tokens = nlp(words)
-        priority = 0
-        interestTokens = tokens[1:]
-        # print(tokens[0])
-        if tokens[0].has_vector: 
-            for i in interestTokens:
-                #if i.has_vector: # TODO: should always be true ... delete later
-                x = studentInterests[i.text]
-                interestVal = x[1]
-                # print(i)
-                # print("similarity", tokens[0].similarity(i))
-                # print("interest", interestVal)
-                priority += (tokens[0].similarity(i)+1)*0.5 * interestVal # similarity() => -1 to 1
-        else:
-            return -1 # nodeTitle does not exist in nlp model, can not be analyzed
-        return (1 - priority / len(interestTokens))
+            timesUpdated, interestVal = studentInterests[interest]
+            intDoc = self.nlp(interest)
+            if len(intDoc) != 1 or len(nodeDoc) != 1:
+                totalSim += (nodeDoc._.s2vphrases[0].s2v_similarity(intDoc._.s2v_phrases[0]) + 1) * 0.5 * interestVal
+            else:
+                totalSim += (nodeDoc.similarity(intDoc) + 1) * 0.5 * interestVal
+        
+        priority = totalSim/len(studentInterests)
+        return 1 - priority
+
+        # words = nodeTitle
+        # for interest in list(studentInterests.keys()):
+        #     words = words + ' ' + interest
+        # # print(words)
+        # tokens = nlp(words)
+        # priority = 0
+        # interestTokens = tokens[1:]
+        # # print(tokens[0])
+        # if tokens[0].has_vector: 
+        #     for i in interestTokens:
+        #         #if i.has_vector: # TODO: should always be true ... delete later
+        #         x = studentInterests[i.text]
+        #         interestVal = x[1]
+        #         # print(i)
+        #         # print("similarity", tokens[0].similarity(i))
+        #         # print("interest", interestVal)
+        #         priority += (tokens[0].similarity(i)+1)*0.5 * interestVal # similarity() => -1 to 1
+        # else:
+        #     return -1 # nodeTitle does not exist in nlp model, can not be analyzed
+        # return (1 - priority / len(interestTokens))
 
 class DomainTracker(GraphTracker):
 
-    def __init__(self, initialInterests) -> None:
+    def __init__(self, nlp, wiki, initialInterests) -> None:
 
-        super().__init__()
+        super().__init__(nlp)
 
-        wikipedia = MediaWiki()
+        self.wikipedia = wiki
+        self.initGraph(initialInterests)
+        
+
+    def initGraph(self, initialInterests):
+
         for i in initialInterests:
-            node = WikiNode(i)
+            node = WikiNode(i, self.nlp, self.wikipedia, domainNode=True)
             self.updateGraph(node)
-            catTree = wikipedia.categorytree(node.getTitle, 2)
-            for subCat in catTree['category']['sub-categories']:
-                subCatNode = WikiNode(subCat, prevNode=node)
+            catTree = self.wikipedia.categorytree(node.getTitle, 2)
+            catDict = catTree['category']
+            subCatsDict = catDict['sub-categories']
+            for subCat in subCatsDict:
+                subCatNode = WikiNode(subCat, self.nlp, self.wikipedia, prevNode=node, domainNode=True)
                 self.updateGraph(subCatNode)
-                subCatDict = catTree['category']['sub-categories'][subCat]
-                node.getKeyWords()
+                # subCatDict = catTree['category']['sub-categories'][subCat]
+                # node.getKeyWords()
+            parentCatsList = catDict['parent-categories']
+            for parentCat in parentCatsList:
+                pass
 
 
 if __name__ == "__main__":

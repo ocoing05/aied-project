@@ -2,7 +2,7 @@ from explorationtracker import ExplorationTracker
 
 class StudentModel:
 
-    def __init__(self, studentName, username, password, email, interestKeywords) -> None:
+    def __init__(self, studentName, interestKeywords, nlp, username = None, password = None, email = None) -> None:
 
         self.studentName = studentName # How to refer to the student
 

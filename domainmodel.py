@@ -9,9 +9,12 @@ from owlready2 import *
 
 class DomainModel:
     
-    def __init__(self, initialInterests) -> None:
-        self.domainTracker = DomainTracker(initialInterests)
-        pass
+    def __init__(self, nlp, wiki, initialInterests) -> None:
+
+        self.wikipedia = wiki
+        self.domainTracker = DomainTracker(nlp, wiki, initialInterests)
+
+    
 
 if __name__ == "__main__":
 

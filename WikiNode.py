@@ -4,33 +4,33 @@ Includes title, url, summary, categories, linked pages, and content of page.
 Uses NLP on content to determine key words, which are used by recommender system.
 """
 
-import wikipedia
 import yake
+from sense2vec import Sense2Vec
+import spacy
 from mediawiki import MediaWiki
 
 class WikiNode:
 
-    def __init__(self, title, prevNode = None, domainNode=False):
+    def __init__(self, title, nlp, wiki, prevNode = None, domainNode=False):
 
         self.domainNode = domainNode
 
-        self.wikipedia = MediaWiki()
+        self.wikipedia = wiki
+        self.nlp = nlp
         self.wikipedia.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone_qharring@macalester.edu' # MediaWiki etiquette
 
         self.title = title
-
-        # the article they read previously to get this suggestion
-        self.prevNode = prevNode
-
-        # Should allow new wikiNode object to be created without DisabmiguationError
         suggestedTitle = self.wikipedia.suggest(title)
         if suggestedTitle:
             self.page = self.wikipedia.page(suggestedTitle)
             self.title = suggestedTitle
-        self.linkedPages = self.page.links
-        self.keywords = []
+        self.keywords = self.getKeyWords()
+        self.prevNode = prevNode # the article they read previously to get this suggestion; None if interestKeyword
+        self.linkedPages = self.sortLinks(self.page.links)
 
-        if domainNode:
+        # Should allow new wikiNode object to be created without DisabmiguationError
+
+        if domainNode: # 
             self.parents = [] 
             self.children = []
             self.siblings = []
@@ -38,6 +38,27 @@ class WikiNode:
             # with high maxVal of (titleSim, keywordSim, linksSim) "wormholes" to other domains.
             # Find knownPeers by running s2v_most_similar on title, keep 
             self.knownPeers = [] 
+
+    def setPrevNode(self, prevNode):
+        self.prevNode = prevNode
+
+    def sortLinks(self, linkList):
+
+        linksPrio = {}
+        for link in linkList:
+            totalSim = 0
+            linkDoc = self.nlp(link)
+            for kw in self.keywords:
+                kwDoc = self.nlp(kw)
+                if len(linkDoc._.s2v_phrases) != 1 or len(kwDoc._.s2v_phrases) != 1:
+                    # adds the standard spacy similarity between link and keyword to totalSim
+                    totalSim += linkDoc.similarity(kwDoc) 
+                else:
+                    # adds the sense2vec similarity between the link token and the keyword token if both in sense2vec vocabulary
+                    totalSim += linkDoc._.phrases[0]._.s2v_similarity(kwDoc._.s2v_phrases[0])
+            linksPrio[link] = totalSim/len(self.keywords)
+
+        return dict(sorted(linksPrio.items(), key=lambda item: item[1])).keys()
 
     def getLinkedPageTitles(self):
         return self.linkedPages
@@ -69,7 +90,7 @@ class WikiNode:
             language = "en"
             max_ngram_size = 1 # only 1-gram so that spacy can work
             deduplication_threshold = 0.1 # set to 0.1 to prohibit repeated words in key words
-            numOfKeywords = 100
+            numOfKeywords = 30
             extractor = yake.KeywordExtractor(
                 lan=language, 
                 n=max_ngram_size, 
@@ -96,7 +117,13 @@ class WikiNode:
 
 if __name__ == "__main__":
 
-    test = WikiNode("Dinosaurs")
+    nlp = spacy.load('en_core_web_lg')
+    s2v = nlp.add_pipe("sense2vec")
+    s2v.from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
+    wiki = MediaWiki()
+    wiki.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone_qharring@macalester.edu' # MediaWiki etiquette
+
+    test = WikiNode("Dinosaurs", nlp, wiki)
     print(test.getSummary())
 
     print("LINKS")
@@ -106,11 +133,11 @@ if __name__ == "__main__":
     keywords = test.getKeyWords()
     print(keywords)
 
-    print("BOTH LINK AND KEYWORD")
-    print(set(test.linkedPages) & set(keywords))
+    # print("BOTH LINK AND KEYWORD")
+    # print(set(test.linkedPages) & set(keywords))
 
-    print("SECTION TITLES")
-    print(test.getSectionTitles())
+    # print("SECTION TITLES")
+    # print(test.getSectionTitles())
 
-    print("CONTENTS OF SECTION TITLED: '", test.getSectionTitles()[0], "'")
-    print(test.getSection(test.getSectionTitles()[0]))
+    # print("CONTENTS OF SECTION TITLED: '", test.getSectionTitles()[0], "'")
+    # print(test.getSection(test.getSectionTitles()[0]))

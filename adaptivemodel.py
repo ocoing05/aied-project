@@ -3,18 +3,28 @@
     2. Domain Model
     3. Session Tracker"""
 
+from sense2vec import Sense2Vec
+import spacy
+from mediawiki import MediaWiki
 
 from studentmodel import StudentModel
 from domainmodel import DomainModel
-from sense2vec import Sense2Vec
-import spacy
+
+
 
 class AdaptiveModel:
     
-    def __init__(self, studentModel, domainModel) -> None:
+    def __init__(self, studentName, studentInterests) -> None:
         
-        self.studentModel = studentModel
-        self.domainModel = domainModel
+        # loading natural language processing pipeline, adding sense2vec for multiword noun phrase similarity analysis 
+        nlp = spacy.load('en_core_web_lg')
+        s2v = nlp.add_pipe("sense2vec")
+        s2v.from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
+
+        wiki = MediaWiki()
+
+        self.studentModel = StudentModel(studentName, studentInterests, nlp)
+        self.domainModel = DomainModel(nlp, wiki, studentInterests)
         self.recommendations = {} # dictionary of WikiNodes and a value between 0 and 1, indicating quality
     
     def getRecommendations(self) -> list:
@@ -38,11 +48,3 @@ class AdaptiveModel:
 
 if __name__ == "__main__":
     pass
-    # nlp = spacy.load('en_core_web_lg')
-    # s2v = nlp.add_pipe("sense2vec")
-    # s2v.from_disk("/path/to/s2v_reddit_2015_md")
-
-    # doc1 = s2v("Alien")
-    # doc2 = s2v("Extraterrestrial")
-
-    # print(doc1.similarity(doc2))
