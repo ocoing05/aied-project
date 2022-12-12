@@ -1,5 +1,5 @@
-from studentmodel import StudentModel
-from wikinode import WikiNode
+from studentmodelTemp import StudentModel 
+from wikinodeTemp import WikiNode 
 from explorationtracker import ExplorationTracker
 from mediawiki import MediaWiki
 import spacy
@@ -257,9 +257,9 @@ if __name__ == "__main__":
 
     # testWikiNodes()
     # testStudentModel()
-    # testExplorationTracker()
+    testExplorationTracker()
     # testRecommender()
     # testUI()
     # testSpacy()
-    testMediaWiki()
+    # testMediaWiki()
     print("All tests pass.")

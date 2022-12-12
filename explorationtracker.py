@@ -4,7 +4,7 @@ import re
 import sense2vec
 
 from FoxQueue import PriorityQueue
-from wikinode import WikiNode
+from wikinodeTemp import WikiNode 
 from mediawiki import MediaWiki
 
 # load nlp and add sense2vec multiword phrase vector pipe

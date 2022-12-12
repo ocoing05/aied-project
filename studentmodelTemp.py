@@ -19,13 +19,14 @@ class StudentModel:
             self.interestKeywords[i] = (1, 1) # initializing all interests retrieved from survey
 
         # explorationTracker contains explored graph, fringe queue, and visited queue(?)
-        self.explorationTracker = ExplorationTracker(interestKeywords)
+        self.explorationTracker = ExplorationTracker(interestKeywords, nlp)
+
+        self.newWords = [] # List of words identified by the student as unknown, or that they are unsure of the meaning
 
         # NOT FULLY IMPLEMENTED...
         self.username = username # self-selected unique student identifier
         self.password = password # protecting account usage
         self.email = email # for resetting password
-        self.newWords = [] # List of words identified by the student as unknown, or that they are unsure of the meaning
         currentSession = None 
         statsBySession = [] # List of sessionStats objects, helps build progress reports for students and teachers
 

@@ -3,7 +3,7 @@
 import yake
 from explorationtracker import DomainTracker
 from FoxQueue import PriorityQueue
-from wikinode import WikiNode
+from wikinodeTemp import WikiNode 
 from mediawiki import MediaWiki
 from owlready2 import *
 
