@@ -1,7 +1,8 @@
 import networkx as nx
 import spacy
 import re
-import sense2vec
+from sense2vec import Sense2Vec
+import copy
 
 from FoxQueue import PriorityQueue
 from wikinode import WikiNode 
@@ -138,6 +139,16 @@ class ExplorationTracker(GraphTracker):
         # else:
         #     return -1 # nodeTitle does not exist in nlp model, can not be analyzed
         # return (1 - priority / len(interestTokens))
+
+    def updatePriorities(self, studentInterests):
+        '''Updates priority values of existing fringe nodes based on updated student interests.'''
+        # TODO: still need to test this once logic is working (mainly to make sure each is what i think it is)
+        # should be called in updateFringe() after shortenFringe()
+        for each in self.fringe:
+            print(each) # TODO: delete after testing
+            node = each[0]
+            newPriority = self.getPriority(node.getTitle(), studentInterests)
+            self.fringe.update(node, newPriority)
 
 class DomainTracker(GraphTracker):
 

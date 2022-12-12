@@ -103,6 +103,9 @@ def testUpdateFringe():
 def testShortenFringe():
     pass
 
+def testUpdatePriorities():
+    student1.explorationTracker.updatePriorities()
+
 # *** Recommender ***
 def testRecommender():
     pass
@@ -257,9 +260,10 @@ if __name__ == "__main__":
 
     # testWikiNodes()
     # testStudentModel()
-    testExplorationTracker()
+    # testExplorationTracker()
     # testRecommender()
     # testUI()
     # testSpacy()
     # testMediaWiki()
+    testUpdatePriorities()
     print("All tests pass.")
