@@ -165,7 +165,10 @@ class DomainTracker(GraphTracker):
                 # node.getKeyWords()
             parentCatsList = catDict['parent-categories']
             for parentCat in parentCatsList:
-                pass
+                parentNode = WikiNode(parentCat, self.nlp, self.wikipedia, domainNode=True)
+                parentDoc = self.nlp(parentCat)
+                for kw in node.getKeyWords():
+                    pass
 
 
 if __name__ == "__main__":
