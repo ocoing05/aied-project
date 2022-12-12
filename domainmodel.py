@@ -1,10 +1,10 @@
 
 
-import yake
+import yake 
 from explorationtracker import DomainTracker
 from FoxQueue import PriorityQueue 
 from wikinode import WikiNode  
-from mediawiki import MediaWiki
+from mediawiki import MediaWiki 
 from owlready2 import *
 
 class DomainModel:
@@ -17,10 +17,10 @@ class DomainModel:
     
 
 if __name__ == "__main__":
-
+    pass
     # 1 Function Iterate(A) :
         # 2 Find page id pd, title t, page namespace pn of page A;
-        # 3 if pn == 0 then
+        # 3 if pn == 0 thencscs
             # 4 Declare title t as an entity e;
             # 5 Find categories (c ∈ C) of entity e;
             # 6 foreach c ∈ C do
@@ -42,10 +42,10 @@ if __name__ == "__main__":
         # 22 end
     # 23 end  
 
-    wikipedia = MediaWiki() 
+    # wikipedia = MediaWiki() 
 
-    onto = get_ontology("file:///Users/quentinharrington/Desktop/COMP484/aied-project/wiki_cats_full_non_cyclic_v1.owl")
-    onto.load()
-    ontoList = list(onto.classes())
-    print(ontoList)
+    # onto = get_ontology("file:///Users/quentinharrington/Desktop/COMP484/aied-project/wiki_cats_full_non_cyclic_v1.owl")
+    # onto.load()
+    # ontoList = list(onto.classes())
+    # print(ontoList)
 

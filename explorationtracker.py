@@ -11,7 +11,7 @@ from mediawiki import MediaWiki
 
 class GraphTracker():
 
-    def __init__(self, nlp) -> None:
+    def __init__(self, nlp, initialInterests) -> None:
 
         self.nlp = nlp # natural language processor 
         self.graph = nx.Graph() # graph of already read articles and edges between them represent from what link they were discovered
@@ -71,12 +71,6 @@ class ExplorationTracker(GraphTracker):
         kwTokens = self.nlp(node.getKeyWords())._.s2v_phrases
         sortedLinks = {} # linkedPageTitles (keys) sorted by their average s2v similarity to all node keywords
 
-        for link in linkedPageTitles:
-            linkDoc = self.nlp(link)
-            if len(linkDoc) == 1: 
-                for kwToken in kwTokens:
-                    sim = 0
-
         # for pg in set(lp) & set(kw): # words that exist as both linked pages and key words of the node
         # TODO: instead of using the set of both ^ like above, maybe use keywords to rank linked pages but don't disregard completely?
         # maybe something like that ^ but use similarity between kw and lp? prioritize the ones where similarity is greatest
@@ -104,7 +98,12 @@ class ExplorationTracker(GraphTracker):
             self.fringe.insert(node, priority)
 
     def getPriority(self, nodeTitle, studentInterests):
-
+        """Param:
+                nodeTitle (string): 
+                studentInterests (dict{string, (int, float)})
+                
+            Returns:
+                priority (float): Avg Similarity (0-high, 1-low) of n"""
         totalSim = 0
         nodeDoc = self.nlp(nodeTitle)
 
@@ -116,8 +115,8 @@ class ExplorationTracker(GraphTracker):
             else:
                 totalSim += (nodeDoc.similarity(intDoc) + 1) * 0.5 * interestVal
         
-        priority = totalSim/len(studentInterests)
-        return 1 - priority
+        priority = 1 - totalSim/len(studentInterests)
+        return priority
 
         # words = nodeTitle
         # for interest in list(studentInterests.keys()):
@@ -164,12 +163,19 @@ class DomainTracker(GraphTracker):
                 # subCatDict = catTree['category']['sub-categories'][subCat]
                 # node.getKeyWords()
             parentCatsList = catDict['parent-categories']
+            sortedParentCats = {}
             for parentCat in parentCatsList:
                 parentNode = WikiNode(parentCat, self.nlp, self.wikipedia, domainNode=True)
                 parentDoc = self.nlp(parentCat)
+                totalSim = 0
                 for kw in node.getKeyWords():
-                    pass
-
+                    kwDoc = self.nlp(kw)
+                    if len(parentDoc) == 1 and len(kwDoc) == 1:
+                        totalSim += parentDoc[0]._.s2v_similarity(kwDoc[0])
+                    else:
+                        totalSim += parentDoc.similarity(kwDoc)
+                sortedParentCats[parentNode] = ( totalSim / len(node.getKeyWords()))
+            sorted(sortedParentCats, key=sortedParentCats.values(), reverse=True)
 
 if __name__ == "__main__":
 

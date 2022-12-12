@@ -3,11 +3,11 @@ Represents a node in the graph of Wikipedia articles.
 Includes title, url, summary, categories, linked pages, and content of page.
 Uses NLP on content to determine key words, which are used by recommender system.
 """
-
 import yake
 from sense2vec import Sense2Vec
 import spacy
 from mediawiki import MediaWiki
+
 
 class WikiNode:
 
@@ -26,11 +26,12 @@ class WikiNode:
             self.title = suggestedTitle
         self.keywords = self.getKeyWords()
         self.prevNode = prevNode # the article they read previously to get this suggestion; None if interestKeyword
-        self.linkedPages = self.sortLinks(self.page.links)
+        self.linkedPages = self._sortLinks(self.page.links)
 
         # Should allow new wikiNode object to be created without DisabmiguationError
 
         if domainNode: # 
+            self.wikipedia.categorytree(self.title, 2)
             self.parents = [] 
             self.children = []
             self.siblings = []
@@ -42,7 +43,7 @@ class WikiNode:
     def setPrevNode(self, prevNode):
         self.prevNode = prevNode
 
-    def sortLinks(self, linkList):
+    def _sortLinks(self, linkList):
 
         linksPrio = {}
         for link in linkList:
@@ -63,7 +64,10 @@ class WikiNode:
     def getLinkedPageTitles(self):
         return self.linkedPages
 
-    def getTitle(self):
+    def getTitle(self) -> str:
+        return self.title
+
+    def toString(self) -> str:
         return self.title
 
     def getURL(self):
@@ -82,21 +86,21 @@ class WikiNode:
         else:
             return self.wikipedia.summary(self.title)
 
+
     def getKeyWords(self):
         if (len(self.keywords) > 0):
             return self.keywords
         else:
             text = self.getContent()
             language = "en"
-            max_ngram_size = 1 # only 1-gram so that spacy can work
-            deduplication_threshold = 0.1 # set to 0.1 to prohibit repeated words in key words
+            max_ngram_size = 5 # only 1-gram so that spacy can work
+            deduplication_threshold = 0.1# set to 0.1 to prohibit repeated words in key words
             numOfKeywords = 30
-            extractor = yake.KeywordExtractor(
-                lan=language, 
-                n=max_ngram_size, 
-                dedupLim=deduplication_threshold, 
-                top=numOfKeywords, 
-                features=None)
+            extractor = yake.KeywordExtractor(lan=language,
+                                              n=max_ngram_size,
+                                              dedupLim=deduplication_threshold,
+                                              top=numOfKeywords,
+                                              features=None)
             tuples = extractor.extract_keywords(text)
             keywords = [i[0] for i in tuples]
             self.keywords = keywords
@@ -115,23 +119,23 @@ class WikiNode:
             else:
                 return "Empty section"
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    nlp = spacy.load('en_core_web_lg')
-    s2v = nlp.add_pipe("sense2vec")
-    s2v.from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
-    wiki = MediaWiki()
-    wiki.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone_qharring@macalester.edu' # MediaWiki etiquette
+#     nlp = spacy.load('en_core_web_lg')
+#     s2v = nlp.add_pipe("sense2vec")
+#     s2v.from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
+#     wiki = MediaWiki()
+#     wiki.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone_qharring@macalester.edu' # MediaWiki etiquette
 
-    test = WikiNode("Dinosaurs", nlp, wiki)
-    print(test.getSummary())
+#     test = WikiNode("Dinosaurs", nlp, wiki)
+#     print(test.getSummary())
 
-    print("LINKS")
-    print(test.linkedPages)
+#     print("LINKS")
+#     print(test.linkedPages)
 
-    print("KEYWORDS")
-    keywords = test.getKeyWords()
-    print(keywords)
+#     print("KEYWORDS")
+#     keywords = test.getKeyWords()
+#     print(keywords)
 
     # print("BOTH LINK AND KEYWORD")
     # print(set(test.linkedPages) & set(keywords))
