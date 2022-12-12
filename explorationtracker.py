@@ -32,10 +32,11 @@ class GraphTracker():
     def getFringe(self, numNodes) -> list:
 
         fringeList = []
-        tempFringeQueue = self.fringe
-        for x in range(1,numNodes):
+        tempFringeQueue = copy.deepcopy(self.fringe) # needs to be copy not ref
+        for x in range(numNodes):
             node = tempFringeQueue.delete()
-            fringeList.append(node)
+            if node is not None:
+                fringeList.append(node)
 
         return fringeList
 
