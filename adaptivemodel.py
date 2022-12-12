@@ -7,7 +7,7 @@ from sense2vec import Sense2Vec
 import spacy
 from mediawiki import MediaWiki
 
-from studentmodelTemp import StudentModel
+from studentmodel import StudentModel
 from domainmodel import DomainModel
 
 
