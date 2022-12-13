@@ -12,7 +12,6 @@ from mediawiki import MediaWiki
 class WikiNode:
 
     def __init__(self, title, nlp, wiki, prevNode = None, domainNode=False):
-
         self.domainNode = domainNode
 
         self.wikipedia = wiki
@@ -25,7 +24,8 @@ class WikiNode:
             self.title = suggestedTitle
         self.keywords = self.getKeyWords()
         self.prevNode = prevNode # the article they read previously to get this suggestion; None if interestKeyword
-        self.linkedPages = self._sortLinks(self.page.links) # Dictionary of links (keys) sorted by highest avg similarity to self.keywords
+        self.linkedPages = self.page.links
+        #self.linkedPages = self._sortLinks(self.page.links) # Dictionary of links (keys) sorted by highest avg similarity to self.keywords
 
         if domainNode: # 
             self.wikipedia.categorytree(self.title, 2)

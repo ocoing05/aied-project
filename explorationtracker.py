@@ -53,23 +53,23 @@ class GraphTracker():
 
 class ExplorationTracker(GraphTracker):
 
-    def __init__(self, nlp, initialInterests) -> None:
+    def __init__(self, nlp, wiki, initialInterests) -> None:
 
         super().__init__(nlp)
-        
+        self.wiki = wiki
         for i in initialInterests:
             try:
-                self.fringe.insert(WikiNode(i), 0.0) 
+                self.fringe.insert(WikiNode(i, nlp, wiki), 0.0) 
             except: # don't add this interest if MediaWiki can't identify the correct article to use
                 continue
 
-    def updateFringe(self, node, studentInterests):
+    def updateFringe(self, node, studentInterests, mvp):
         '''Called by the student model update() method after a student reads a new article.
         Updates fringe with linked articles from node they just read. Ranked based on student interests.'''
         if self.fringe.size > 30:
             self.shortenFringe(self.fringe.size / 2) # cut fringe size in half
         linkedPageTitles = node.getLinkedPageTitles() # links are sorted by similarity to node keywords
-        if node in self.fringe:
+        if self.fringe.contains(node):
             self.fringe.removeValue(node)
         # for pg in set(lp) & set(kw): # words that exist as both linked pages and key words of the node
         # TODO: instead of using the set of both ^ like above, maybe use keywords to rank linked pages but don't disregard completely?
@@ -85,14 +85,18 @@ class ExplorationTracker(GraphTracker):
             #    # TODO: logic for n-gram pages?
             #    # print("n-gram")
             #    continue
-
-            priority = self.getPriority(pg, studentInterests)
-            # if priority == -1: 
-            #     continue # ignore if does not exist in spacy nlp model
+            if (mvp):
+                if len(pg.strip().split(" ")) > 1 or not pg.isalpha(): # more than 1-gram phrases and non-letters will mess up spacy's analysis
+                    continue
+                priority = self.getPriorityMVP(pg,studentInterests)
+            else:
+                priority = self.getPriority(pg, studentInterests)
+            if priority == -1: 
+                continue # ignore if does not exist in spacy nlp model
             # print(priority)
 
-            print(node.title, priority)
-            self.fringe.insert(node, priority)
+            print(pg, priority)
+            self.fringe.insert(WikiNode(pg, self.nlp, self.wiki, prevNode = node), priority)
 
     def getPriority(self, nodeTitle, studentInterests) -> float:
         """Param:
@@ -113,26 +117,27 @@ class ExplorationTracker(GraphTracker):
         
         return 1 - totalSim/len(studentInterests)
 
-        # words = nodeTitle
-        # for interest in list(studentInterests.keys()):
-        #     words = words + ' ' + interest
-        # # print(words)
-        # tokens = nlp(words)
-        # priority = 0
-        # interestTokens = tokens[1:]
-        # # print(tokens[0])
-        # if tokens[0].has_vector: 
-        #     for i in interestTokens:
-        #         #if i.has_vector: # TODO: should always be true ... delete later
-        #         x = studentInterests[i.text]
-        #         interestVal = x[1]
-        #         # print(i)
-        #         # print("similarity", tokens[0].similarity(i))
-        #         # print("interest", interestVal)
-        #         priority += (tokens[0].similarity(i)+1)*0.5 * interestVal # similarity() => -1 to 1
-        # else:
-        #     return -1 # nodeTitle does not exist in nlp model, can not be analyzed
-        # return (1 - priority / len(interestTokens))
+    def getPriorityMVP(self, nodeTitle, studentInterests):
+        words = nodeTitle
+        for interest in list(studentInterests.keys()):
+            words = words + ' ' + interest
+        # print(words)
+        tokens = self.nlp(words)
+        priority = 0
+        interestTokens = tokens[1:]
+        # print(tokens[0])
+        if tokens[0].has_vector: 
+            for i in interestTokens:
+                #if i.has_vector: # TODO: should always be true ... delete later
+                x = studentInterests[i.text]
+                interestVal = x[1]
+                # print(i)
+                # print("similarity", tokens[0].similarity(i))
+                # print("interest", interestVal)
+                priority += (tokens[0].similarity(i)+1)*0.5 * interestVal # similarity() => -1 to 1
+        else:
+            return -1 # nodeTitle does not exist in nlp model, can not be analyzed
+        return (1 - priority / len(interestTokens))   
 
     def updatePriorities(self, studentInterests):
         '''Updates priority values of existing fringe nodes based on updated student interests.'''

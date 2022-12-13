@@ -2,8 +2,8 @@ from explorationtracker import ExplorationTracker
 
 class StudentModel:
 
-    def __init__(self, studentName, interestKeywords, nlp, username = None, password = None, email = None) -> None:
-
+    def __init__(self, studentName, interestKeywords, nlp, wiki, username = None, password = None, email = None) -> None:
+        
         self.studentName = studentName # How to refer to the student
 
         self.interestKeywords = {}  # dictionary of interest keywords, and a tuple:
@@ -20,7 +20,7 @@ class StudentModel:
             self.interestKeywords[i] = (1, 1) # initializing all interests retrieved from survey
 
         # explorationTracker contains explored graph and fringe queue
-        self.explorationTracker = ExplorationTracker(nlp, interestKeywords)
+        self.explorationTracker = ExplorationTracker(nlp, wiki, interestKeywords)
         self.nlp = nlp
         self.newWords = [] # List of words identified by the student as unknown, or that they are unsure of the meaning
 
@@ -42,14 +42,14 @@ class StudentModel:
     def getFringe(self, numNodes) -> list:
         return self.explorationTracker.getFringe(numNodes)
 
-    def updateModel(self, node) -> None:
+    def updateModel(self, node, mvp) -> None:
         '''Called when the student reads a new article.
             Updates progress graph, student interest dictionary, and fringe queue.
             Parameter node = the WikiNode representing the article they just read.'''
         # update progress graph with new WikiNode article read
         self.explorationTracker.updateGraph(node)
         # update fringe queue with linked nodes
-        self.explorationTracker.updateFringe(node, self.interestKeywords)
+        self.explorationTracker.updateFringe(node, self.interestKeywords, mvp)
 
     def updateInterestKeyword(self, keyword, newInterestValue) -> None:
         """This function is called when a new interest value is retrieved,
