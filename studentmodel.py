@@ -19,7 +19,7 @@ class StudentModel:
             i = interest.lower()
             self.interestKeywords[i] = (1, 1) # initializing all interests retrieved from survey
 
-        # explorationTracker contains explored graph, fringe queue, and visited queue(?)
+        # explorationTracker contains explored graph and fringe queue
         self.explorationTracker = ExplorationTracker(nlp, interestKeywords)
 
         self.newWords = [] # List of words identified by the student as unknown, or that they are unsure of the meaning
