@@ -12,7 +12,7 @@ from mediawiki import MediaWiki
 
 class GraphTracker():
 
-    def __init__(self, nlp, initialInterests) -> None:
+    def __init__(self, nlp) -> None:
 
         self.nlp = nlp # natural language processor 
         self.graph = nx.Graph() # graph of already read articles and edges between them represent from what link they were discovered
@@ -68,10 +68,9 @@ class ExplorationTracker(GraphTracker):
         Updates fringe with linked articles from node they just read. Ranked based on student interests.'''
         if self.fringe.size > 30:
             self.shortenFringe(self.fringe.size / 2) # cut fringe size in half
-        linkedPageTitles = node.getLinkedPageTitles()
-        kwTokens = self.nlp(node.getKeyWords())._.s2v_phrases
-        sortedLinks = {} # linkedPageTitles (keys) sorted by their average s2v similarity to all node keywords
-
+        linkedPageTitles = node.getLinkedPageTitles() # links are sorted by similarity to node keywords
+        if node in self.fringe:
+            self.fringe.removeValue(node)
         # for pg in set(lp) & set(kw): # words that exist as both linked pages and key words of the node
         # TODO: instead of using the set of both ^ like above, maybe use keywords to rank linked pages but don't disregard completely?
         # maybe something like that ^ but use similarity between kw and lp? prioritize the ones where similarity is greatest
@@ -88,36 +87,31 @@ class ExplorationTracker(GraphTracker):
             #    continue
 
             priority = self.getPriority(pg, studentInterests)
-            if priority == -1: 
-                continue # ignore if does not exist in spacy nlp model
+            # if priority == -1: 
+            #     continue # ignore if does not exist in spacy nlp model
             # print(priority)
-            try: 
-                node = WikiNode(pg, node.title)
-            except: # ignore if MediaWiki can't identify which article should be used for this title
-                continue
+
             print(node.title, priority)
             self.fringe.insert(node, priority)
 
-    def getPriority(self, nodeTitle, studentInterests):
+    def getPriority(self, nodeTitle, studentInterests) -> float:
         """Param:
-                nodeTitle (string): 
+                nodeTitle (string)
                 studentInterests (dict{string, (int, float)})
-                
             Returns:
-                priority (float): Avg Similarity (0-high, 1-low) of n"""
+                priority (float): Avg Similarity (0-high, 1-low) of node to studentInterests."""
         totalSim = 0
         nodeDoc = self.nlp(nodeTitle)
 
         for interest in list(studentInterests.keys()):
             timesUpdated, interestVal = studentInterests[interest]
             intDoc = self.nlp(interest)
-            if len(intDoc) != 1 or len(nodeDoc) != 1:
-                totalSim += (nodeDoc._.s2vphrases[0].s2v_similarity(intDoc._.s2v_phrases[0]) + 1) * 0.5 * interestVal
+            if len(intDoc) == 1 and len(nodeDoc) == 1:
+                totalSim += (nodeDoc._.s2v_phrases[0].s2v_similarity(intDoc._.s2v_phrases[0]) + 1) * 0.5 * interestVal
             else:
                 totalSim += (nodeDoc.similarity(intDoc) + 1) * 0.5 * interestVal
         
-        priority = 1 - totalSim/len(studentInterests)
-        return priority
+        return 1 - totalSim/len(studentInterests)
 
         # words = nodeTitle
         # for interest in list(studentInterests.keys()):
@@ -182,11 +176,13 @@ class DomainTracker(GraphTracker):
                 for kw in node.getKeyWords():
                     kwDoc = self.nlp(kw)
                     if len(parentDoc) == 1 and len(kwDoc) == 1:
-                        totalSim += parentDoc[0]._.s2v_similarity(kwDoc[0])
+                        totalSim += parentDoc._.s2v_phrases[0]._.s2v_similarity(kwDoc._.s2v_phrases[0])
                     else:
                         totalSim += parentDoc.similarity(kwDoc)
                 sortedParentCats[parentNode] = ( totalSim / len(node.getKeyWords()))
-            sorted(sortedParentCats, key=sortedParentCats.values(), reverse=True)
+            parentNode = dict(sorted(sortedParentCats.items(), key=lambda item:item[0], reverse=True)).items()[0][0]
+            node.setPrevNode(parentNode)
+
 
 if __name__ == "__main__":
 

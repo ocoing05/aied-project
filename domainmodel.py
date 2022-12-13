@@ -14,7 +14,8 @@ class DomainModel:
         self.wikipedia = wiki
         self.domainTracker = DomainTracker(nlp, wiki, initialInterests)
 
-    
+    def updateModel(self, node):
+        self.domainTracker.updateGraph(node)
 
 if __name__ == "__main__":
     pass

@@ -8,22 +8,39 @@ import yake
 
 # *** MOCK DATA ***
 
+# Domain and NLP objects
+    # create Spacy natural language processor, 
+    # add sense2vec pipe for multiword phrase similarity accuracy
+nlp = spacy.load('en_core_web_lg')
+s2v = nlp.add_pipe("sense2vec")
+s2v.from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
+    # create MediaWiki() object and setting user_agent following mediawiki etiquette
+wiki = MediaWiki()
+wiki.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone_qharring@macalester.edu' # MediaWiki etiquette
+
 # create students
-student1 = StudentModel("Ingrid", "ingrid", "12345", "ioconnor@macalester.edu", ["Disney", "Dinosaurs", "Volcanoes"])
-student2 = StudentModel("Quentin Harrington", 
-                        "quentinroyal", 
-                        "password",
-                        "qharring@macalester.edu", 
-                        ["Computers", "Sustainability", "Ecology", "Soccer", "Urbanism", "Architecture", "Plants", "Psychology"])
+student1 = StudentModel("Ingrid", 
+                        ["Disney", "Dinosaurs", "Volcanoes"],
+                        nlp,
+                        username="ingrid", 
+                        password="12345", 
+                        email="ioconnor@macalester.edu")
+studentQ = StudentModel("Quentin Harrington", 
+                        ["Computers", "Sustainability", "Ecology", "Soccer", "Urbanism", "Architecture", "Plants", "Psychology"],
+                        nlp)
+student3 = StudentModel("student3", 
+                        ["Rainbows", "Dragons", "Hippopotamus", "Japan", "Fruit", "Baking", "Photography", "Hiking", "Kayaking"],  
+                        nlp)
+
 
 # create articles
-article1 = WikiNode("Disney")
-article2 = WikiNode("Penguins")
-article3 = WikiNode("Volcanoes")
-article4 = WikiNode("Egyptian pyramids")
-article5 = WikiNode("Wolfgang Amadeus Mozart")
+article1 = WikiNode("Disney", nlp, wiki)
+article2 = WikiNode("Penguins", nlp, wiki)
+article3 = WikiNode("Volcanoes", nlp, wiki)
+article4 = WikiNode("Egyptian pyramids", nlp, wiki)
+article5 = WikiNode("Wolfgang Amadeus Mozart", nlp, wiki)
 # when creating new nodes, if the node was added from the fringe by being linked from a previous article it would be created like this:
-article6 = WikiNode("Mickey Mouse", "Disney")
+article6 = WikiNode("Mickey Mouse", nlp, wiki, prevNode=article1)
 
 # *** TEST DEFINITIONS ***
 
@@ -60,7 +77,7 @@ def testStudentModel():
     # TODO: student creation, fringe updates, student interest updates, session stats
 
 def testStudentCreation():
-    student2 = StudentModel("test", "test", "12345", "test@test.com", ["Dogs", "Dinosaurs", "Volcanoes", "Disney"])
+    student2 = StudentModel("test", ["Dogs", "Dinosaurs", "Volcanoes", "Disney"], nlp)
     assert student2.getStudentName() == 'test'
     assert 'Dogs' in student2.getInterestKeywords()
     assert 'Volcanoes' in student2.getInterestKeywords()
@@ -104,7 +121,7 @@ def testShortenFringe():
     pass
 
 def testUpdatePriorities():
-    student1.explorationTracker.updatePriorities()
+    student1.explorationTracker.updatePriorities(student1.getInterestKeywords())
 
 # *** Recommender ***
 def testRecommender():
@@ -114,7 +131,7 @@ def testRecommender():
 def testUI():
     pass
 
-# *** spacy and sense2vec ***
+# *** Spacy and sense2vec ***
 def testSpacy():
 
     # doc = s2vNLP("A sentence about natural language processing.")
@@ -130,6 +147,9 @@ def testSpacy():
     #     assert ent._.in_s2v
     #     most_similar = ent._.s2v_most_similar(3)
     # print(most_similar
+    pass
+
+def tests2v():
     pass
 
 def testMediaWiki():
@@ -236,34 +256,14 @@ def testMediaWiki():
 
         # print(summaryTokens)
 
-def _sortFunc():
-    # text = self.getContent()
-    language = "en"
-    max_ngram_size = 1 # only 1-gram so that spacy can work
-    deduplication_threshold = 0.1 # set to 0.1 to prohibit repeated words in key words
-    numOfKeywords = 100
-    extractor = yake.KeywordExtractor(
-        lan=language, 
-        n=max_ngram_size, 
-        dedupLim=deduplication_threshold, 
-        top=numOfKeywords, 
-        features=None)
-    # tuples = extractor.extract_keywords(text)
-    # keywords = [i[0] for i in tuples]
-    # self.keywords = keywords
-    # return keywords
-    pass
-
 # *** RUN TESTS ***
 
 if __name__ == "__main__":
 
-    # testWikiNodes()
-    # testStudentModel()
-    # testExplorationTracker()
-    # testRecommender()
-    # testUI()
-    # testSpacy()
-    # testMediaWiki()
+    testWikiNodes()
+    testStudentModel()
+    testExplorationTracker()
+    testRecommender()
+    testUI()
     testUpdatePriorities()
     print("All tests pass.")

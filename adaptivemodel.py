@@ -3,9 +3,9 @@
     2. Domain Model
     3. Session Tracker"""
 
-from sense2vec import Sense2Vec
+from sense2vec import Sense2Vec 
 import spacy
-from mediawiki import MediaWiki
+from mediawiki import MediaWiki 
 
 from studentmodel import StudentModel
 from domainmodel import DomainModel
@@ -23,17 +23,28 @@ class AdaptiveModel:
 
         wiki = MediaWiki()
 
-        self.studentModel = StudentModel(studentName, studentInterests, nlp)
+        self.student = StudentModel(studentName, studentInterests, nlp)
         self.domainModel = DomainModel(nlp, wiki, studentInterests)
         self.recommendations = {} # dictionary of WikiNodes and a value between 0 and 1, indicating quality
     
-    def getRecommendations(self) -> list:
+    def getArticles(self) -> list:
+        """return a student-specific list of wikiNode pages, sorted by"""
 
-        if (self.studentModel == None):
+        if (self.student == None):
             # error: no studentModel loaded
+            print("No student model found.")
             return []
         else:
+            self.student.updateModel()
             return self.recommendations.keys()
+
+    def update(self, node):
+
+        self.student.updateModel(node)
+        self.domainModel.updateModel(node)
+
+    def updateInterest(self, node, interestVal):
+        self.student.updateInterestKeyword(node.title, interestVal)
 
 # Notes:
 

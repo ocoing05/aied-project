@@ -17,7 +17,6 @@ class WikiNode:
 
         self.wikipedia = wiki
         self.nlp = nlp
-        self.wikipedia.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone_qharring@macalester.edu' # MediaWiki etiquette
 
         self.title = title
         suggestedTitle = self.wikipedia.suggest(title)
@@ -26,9 +25,7 @@ class WikiNode:
             self.title = suggestedTitle
         self.keywords = self.getKeyWords()
         self.prevNode = prevNode # the article they read previously to get this suggestion; None if interestKeyword
-        self.linkedPages = self._sortLinks(self.page.links)
-
-        # Should allow new wikiNode object to be created without DisabmiguationError
+        self.linkedPages = self._sortLinks(self.page.links) # Dictionary of links (keys) sorted by highest avg similarity to self.keywords
 
         if domainNode: # 
             self.wikipedia.categorytree(self.title, 2)
@@ -44,7 +41,7 @@ class WikiNode:
         self.prevNode = prevNode
 
     def _sortLinks(self, linkList):
-
+        """Returns a dictionary of page links sorted by highest average similarity to self.keywords."""
         linksPrio = {}
         for link in linkList:
             totalSim = 0
@@ -59,9 +56,9 @@ class WikiNode:
                     totalSim += linkDoc._.phrases[0]._.s2v_similarity(kwDoc._.s2v_phrases[0])
             linksPrio[link] = totalSim/len(self.keywords)
 
-        return dict(sorted(linksPrio.items(), key=lambda item: item[1])).keys()
+        return dict(sorted(linksPrio.items(), key=lambda item: item[1]))
 
-    def getLinkedPageTitles(self):
+    def getLinkedPageTitles(self) -> dict:
         return self.linkedPages
 
     def getTitle(self) -> str:
@@ -88,23 +85,20 @@ class WikiNode:
 
 
     def getKeyWords(self):
-        if (len(self.keywords) > 0):
-            return self.keywords
-        else:
-            text = self.getContent()
-            language = "en"
-            max_ngram_size = 5 # only 1-gram so that spacy can work
-            deduplication_threshold = 0.1# set to 0.1 to prohibit repeated words in key words
-            numOfKeywords = 30
-            extractor = yake.KeywordExtractor(lan=language,
-                                              n=max_ngram_size,
-                                              dedupLim=deduplication_threshold,
-                                              top=numOfKeywords,
-                                              features=None)
-            tuples = extractor.extract_keywords(text)
-            keywords = [i[0] for i in tuples]
-            self.keywords = keywords
-            return keywords
+        text = self.getContent()
+        language = "en"
+        max_ngram_size = 5 # only 1-gram so that spacy can work
+        deduplication_threshold = 0.1# set to 0.1 to prohibit repeated words in key words
+        numOfKeywords = 30
+        extractor = yake.KeywordExtractor(lan=language,
+                                            n=max_ngram_size,
+                                            dedupLim=deduplication_threshold,
+                                            top=numOfKeywords,
+                                            features=None)
+        tuples = extractor.extract_keywords(text)
+        keywords = [i[0] for i in tuples]
+        self.keywords = keywords
+        return keywords
 
     def getSectionTitles(self):
         return self.page.sections
