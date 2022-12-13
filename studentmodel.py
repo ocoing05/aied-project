@@ -8,11 +8,12 @@ class StudentModel:
 
         self.interestKeywords = {}  # dictionary of interest keywords, and a tuple:
                                     # first value: times updated
-                                    # second value: level of interest, between 0.0 and 1.0
+                                    # second value: total summed level of interest over all times updated
+                                    # (interest level is between 0.0 and 1.0 each time)
                                     #
                                     # Level of interest is determined by:
-                                    #   1. Summing values all values inputed for the specific keyword
-                                    #   2. Dividing summed value by number of times updated
+                                    #   dividing the total interest level by the times updated, 
+                                    #   to get an average interest value between 0.0 and 1.0
 
         for interest in interestKeywords:
             i = interest.lower()
