@@ -49,7 +49,7 @@ def testWikiNodes():
     testSections()
     testSummary()
     testPrevNode()
-    testKeyWords()
+    # testKeyWords()
 
 def testSections():
     assert 'History' in article1.getSectionTitles()
@@ -63,7 +63,7 @@ def testSummary():
 
 def testPrevNode():
     assert article1.prevNode == None
-    assert article6.prevNode == "Disney"
+    assert article6.prevNode == article1
 
 def testKeyWords():
     kw = article1.getKeyWords()
@@ -79,8 +79,8 @@ def testStudentModel():
 def testStudentCreation():
     student2 = StudentModel("test", ["Dogs", "Dinosaurs", "Volcanoes", "Disney"], nlp)
     assert student2.getStudentName() == 'test'
-    assert 'Dogs' in student2.getInterestKeywords()
-    assert 'Volcanoes' in student2.getInterestKeywords()
+    assert 'dogs' in student2.getInterestKeywords()
+    assert 'volcanoes' in student2.getInterestKeywords()
     # TODO : test fringe creation
 
 # *** ExplorationTracker ***
@@ -132,25 +132,137 @@ def testUI():
     pass
 
 # *** Spacy and sense2vec ***
-def testSpacy():
+def testSpacy_and_s2v():
 
-    # doc = s2vNLP("A sentence about natural language processing.")
-    # assert doc[3:6].text == "natural language processing"
-    # freq = doc[3:6]._.s2v_freq
-    # vector = doc[3:6]._.s2v_vec
-    # most_similar = doc[3:6]._.s2v_most_similar(3)
-    # print(freq)
-    # print(most_similar)
+    def sortFunc(tup):
+        ((word, sense), score) = tup
+        return score
 
-    # doc = s2vNLP("A sentence about Facebook and Google.")
-    # for ent in doc.ents:
-    #     assert ent._.in_s2v
-    #     most_similar = ent._.s2v_most_similar(3)
-    # print(most_similar
-    pass
+    def getMostSimilar(keySpan, num) -> list:
+        base = ''.join(char for char in keySpan.lemma_.lower() if char.isalpha())
+        print("phrase: " + keySpan.text + "\n --> lemma (alpha only): " + base)
+        uniqueWordsAdded = 0
+        count = 0 
+        all_similar = keySpan._.s2v_most_similar(100)
+        most_similar = {}
+        while uniqueWordsAdded < num:
+            if count > (len(all_similar) - 1):
+                break
+            ((word, sense), score) = all_similar[count]
+            count+=1
+            # print("\tSim. word: " + word)
+            wordDoc = nlp(word)
 
-def tests2v():
-    pass
+            # filter words
+            if not wordDoc._.s2v_phrases:
+                continue
+            oov = False
+            for token in wordDoc:
+                if token.is_oov:
+                    oov = True
+            if oov:
+                continue
+            
+            freq = wordDoc[0:]._.s2v_freq
+            # print(freq)
+            if freq != None:
+                if freq < 500:
+                    continue
+            else: 
+                continue
+
+            wordSpan = wordDoc[0:len(wordDoc)]
+            simpleWord = ''.join(char for char in wordSpan.lemma_.lower() if char.isalpha())
+            # print("\t --> lemma (alpha only): " + simpleWord)
+
+            # skip similar word if it is just a version of the original word
+            if base in simpleWord or simpleWord in base:
+                continue
+
+            # add word to most_similiar dictionary, or add a sense/score
+            if most_similar.get(simpleWord):
+                most_similar[simpleWord].update({sense:(score, word)})
+            else:
+                most_similar[simpleWord] = {sense:(score, word)}
+                uniqueWordsAdded+=1
+
+        # get sense, score, and full word for each simplified word in most_similar,
+        # sort descending by score
+        sortedSim = []
+        for word in most_similar:
+            sortedKeys = list(dict(sorted(most_similar[word].items(), key=lambda item:item[0], reverse=True)).keys())
+            topSense = sortedKeys[0]
+            score, ogWord = most_similar[word][topSense]
+            sortedSim.append(((ogWord, topSense), score))
+        sortedSim.sort(key=sortFunc, reverse=True)
+
+        # print out similar words in order
+        count = 0
+        for wordTup in sortedSim:
+            count+=1
+            ((word, sense), score) = wordTup
+            freq = nlp(word)[0:]._.s2v_freq
+            print("\t" + str(count) + ": " + word + ", " + sense)
+            print("\t\tsim = " + str(score))
+            print("\t\tword frequency = " + str(freq))
+
+
+    doc = nlp("man")
+    doc1 = nlp("A sentence about natural language processing.")
+    doc2 = nlp("A sentence about Facebook and Google.")
+    doc3 = nlp("The quick brown fox jumps over the lazy dog.")
+    doc4 = nlp("""Computer science is a very fun college major, 
+                and I think Albert Einstein and Isaac Newton would 
+                approve of studying Artificial Intelligence. AGI will come to 
+                rule the world, and no human can currently comprehend the 
+                implications of this new technology. An entirely new social structure 
+                is needed to handle this software upgrade, and allow the Earth and 
+                all human habitats to undertake a hardware upgrade. ChatGPT is only 
+                the very beginning of this new era of non-human intelligent design, 
+                the scope of which will soon come to encompass everything, and maybe 
+                even humans themselves.""")
+
+    # # doc test
+    # testStr = doc.__getitem__(0).text
+    # freq = doc.__getitem__(0)._.s2v_freq
+    # print(testStr + " --> frequency = " + str(freq))
+
+    # # doc1 test
+    # span1 = doc1[3:6]
+    # assert span1.text == "natural language processing"
+    # freq = span1._.s2v_freq
+    # vector = span1._.s2v_vec
+    # print(span1.text + " --> frequency = " + str(freq))
+    # getMostSimilar(span1, 10)
+
+    # doc2 test
+    for ent in doc2.ents:
+        assert ent._.in_s2v
+        freq = ent._.s2v_freq
+        print(ent.text + " --> frequency = " + str(freq))
+        getMostSimilar(ent, 10)
+
+    # # doc3 test
+    # assert not doc3.ents 
+    # importantWords = []
+    # for token in doc3:
+    #     if not token.is_stop and token.is_alpha: 
+    #         text = token.text
+    #         importantWords.append(text)
+    #         # print(text)
+    # assert importantWords == ["quick", "brown", "fox", "jumps", "lazy", "dog"]
+
+    # # doc4 test
+    # entList = []
+    # for ent in doc4.ents:
+    #     try:   
+    #         assert ent._.in_s2v
+    #     except:
+    #         continue
+    #     entList.append(ent.text)
+    #     freq = ent._.s2v_freq
+    #     print(ent.text + ", frequency --> " + str(freq))
+    # assert entList == ["Albert Einstein", "Isaac Newton", "Artificial Intelligence", "Earth"]
 
 def testMediaWiki():
     """Testing:
@@ -252,18 +364,17 @@ def testMediaWiki():
         #         continue
         #     else:
         #         summaryTokens.append(token)
-        
 
         # print(summaryTokens)
-
+ 
 # *** RUN TESTS ***
-
 if __name__ == "__main__":
 
     testWikiNodes()
     testStudentModel()
     testExplorationTracker()
-    testRecommender()
-    testUI()
-    testUpdatePriorities()
+    # testRecommender()
+    # testUI()
+    # testUpdatePriorities()
+    
     print("All tests pass.")
