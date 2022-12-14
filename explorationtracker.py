@@ -18,13 +18,6 @@ class GraphTracker():
         self.graph = nx.Graph() # graph of already read articles and edges between them represent from what link they were discovered
         self.fringe = PriorityQueue() # unopened WikiNodes adjacent to progressGraph, sorted by potential interest
 
-    def updateGraph(self, node):
-        '''Called by the student model update() method after a student reads a new article. 
-        Adds node to graph.'''
-        self.graph.add_node(node.title)
-        if node.prevNode:
-            self.graph.add_edge(node.title, node.prevNode)
-
     def alreadyExplored(self, title):
         if title in list(self.graph.nodes):
             return True
@@ -62,6 +55,13 @@ class ExplorationTracker(GraphTracker):
                 self.fringe.insert(WikiNode(i, nlp, wiki), 0.0) 
             except: # don't add this interest if MediaWiki can't identify the correct article to use
                 continue
+
+    def updateGraph(self, node):
+        '''Called by the student model update() method after a student reads a new article. 
+        Adds node to graph.'''
+        self.graph.add_node(node.title)
+        if node.prevNode:
+            self.graph.add_edge(node.title, node.prevNode)
 
     def updateFringe(self, node, studentInterests, mvp):
         '''Called by the student model update() method after a student reads a new article.
@@ -152,13 +152,11 @@ class DomainTracker(GraphTracker):
         self.wikipedia = wiki
         self.initGraph(initialInterests)
         
-
     def initGraph(self, initialInterests):
-
         for i in initialInterests:
             node = WikiNode(i, self.nlp, self.wikipedia, domainNode=True)
             self.updateGraph(node)
-            catTree = self.wikipedia.categorytree(node.getTitle, 2)
+            catTree = self.wikipedia.categorytree(node.getTitle, 1)
             catDict = catTree['category']
             subCatsDict = catDict['sub-categories']
             for subCat in subCatsDict:
@@ -182,6 +180,10 @@ class DomainTracker(GraphTracker):
             parentNode = dict(sorted(sortedParentCats.items(), key=lambda item:item[0], reverse=True)).items()[0][0]
             node.setPrevNode(parentNode)
 
+    def updateGraph(self, node):
+        self.graph.add_node(node.title)
+        if node.prevNode:
+            self.graph.add_edge(node.title, node.prevNode)
 
 if __name__ == "__main__":
 
