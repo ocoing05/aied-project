@@ -12,23 +12,46 @@ from mediawiki import MediaWiki
 class WikiNode:
 
     def __init__(self, title, nlp, wiki, prevNode = None, domainNode=False):
-        self.domainNode = domainNode
 
+        # Instantiate wikiNode attributes
+        self.title = title
+        self.page = None
+        self.keywords = []
+        self.linkedPages = {} 
+        self.prevNode = prevNode # the article they read previously to get this suggestion; None if interestKeyword
+        self.domainNode = domainNode # If node is in domain model
         self.wikipedia = wiki
         self.nlp = nlp
 
-        self.title = title
+        # From given title, find most appropriate wikipedia page
         suggestedTitle = self.wikipedia.suggest(title)
+        # print("Desired Page: ", title, "\nPage Received: ", suggestedTitle)
         if suggestedTitle:
             self.page = self.wikipedia.page(suggestedTitle)
             self.title = suggestedTitle
-        self.keywords = self.getKeyWords()
-        self.prevNode = prevNode # the article they read previously to get this suggestion; None if interestKeyword
-        self.linkedPages = self.page.links
-        #self.linkedPages = self._sortLinks(self.page.links) # Dictionary of links (keys) sorted by highest avg similarity to self.keywords
 
+        # Extract and set top 30 keywords with yake, sort links by similarity to keywords
+        # -------------------------------------------------------------------------------
+        text = self.getContent()
+        language = "en"
+        max_ngram_size = 3 # only 1-gram so that spacy can work
+        deduplication_threshold = 0.5 # set to 0.1 to prohibit repeated words in key words
+        numOfKeywords = 50
+        extractor = yake.KeywordExtractor(lan=language,
+                                            n=max_ngram_size,
+                                            dedupLim=deduplication_threshold,
+                                            top=numOfKeywords,
+                                            features=None)
+        tuples = extractor.extract_keywords(text)
+        keywords = [i[0] for i in tuples]
+        self.keywords = keywords
+        self.sortKeywords()
+        self.linkedPages = self._sortLinks(self.page.links) # Dictionary of links (keys) sorted by highest avg similarity to self.keywords
+        # -------------------------------------------------------------------------------        
+
+        # If wikiNode is in the domain model, set domain hierarchy details
         if domainNode: # 
-            self.wikipedia.categorytree(self.title, 2)
+            self.catTree = self.wikipedia.categorytree(self.title, 1)
             self.parents = [] 
             self.children = []
             self.siblings = []
@@ -37,29 +60,64 @@ class WikiNode:
             # Find knownPeers by running s2v_most_similar on title, keep 
             self.knownPeers = [] 
 
+    def sortKeywords(self):
+        nodeDoc = self.nlp(self.title)
+        kwDict = {}
+        for kw in self.keywords:
+            kwDoc = self.nlp(kw)
+            if not kwDoc.has_vector:
+                continue
+            
+            if nodeDoc[0:]._.in_s2v and kwDoc[0:]._.in_s2v:
+                # adds the sense2vec similarity between the link token and the keyword token if both in sense2vec vocabulary
+                kwDict.update({kw:nodeDoc[0:]._.s2v_similarity(kwDoc[0:])})
+            else:
+                kwDict.update({kw:nodeDoc.similarity(kwDoc)})
+        self.keywords = list(dict(sorted(kwDict.items(), key=lambda x:x[1], reverse=True)).keys())
+
     def setPrevNode(self, prevNode):
         self.prevNode = prevNode
 
     def _sortLinks(self, linkList):
         """Returns a dictionary of page links sorted by highest average similarity to self.keywords."""
         linksPrio = {}
+
         for link in linkList:
             totalSim = 0
             linkDoc = self.nlp(link)
+            if not linkDoc.has_vector:
+                continue
+            # print("Link: ", linkDoc)
             for kw in self.keywords:
                 kwDoc = self.nlp(kw)
-                if len(linkDoc._.s2v_phrases) != 1 or len(kwDoc._.s2v_phrases) != 1:
-                    # adds the standard spacy similarity between link and keyword to totalSim
-                    totalSim += linkDoc.similarity(kwDoc) 
-                else:
+                if not kwDoc.has_vector:
+                    continue
+                # print("\tKeyword: ", kwDoc)
+                if linkDoc[0:]._.in_s2v and kwDoc[0:]._.in_s2v:
                     # adds the sense2vec similarity between the link token and the keyword token if both in sense2vec vocabulary
-                    totalSim += linkDoc._.phrases[0]._.s2v_similarity(kwDoc._.s2v_phrases[0])
+                    sim = linkDoc[0:]._.s2v_similarity(kwDoc[0:])
+                    # print("\tSimilarity: ", sim)
+                    totalSim += sim
+                else:
+                    # adds the standard spacy similarity between link and keyword to totalSim
+                    sim = linkDoc.similarity(kwDoc) 
+                    # print("\tSimilarity: ", sim)
+                    totalSim += sim
+                                        
             linksPrio[link] = totalSim/len(self.keywords)
 
-        return dict(sorted(linksPrio.items(), key=lambda item: item[1]))
+        return dict(sorted(linksPrio.items(), key=lambda x:x[1], reverse=True))
 
-    def getLinkedPageTitles(self) -> dict:
-        return self.linkedPages
+    def getLinkedPageTitles(self, numLinks=None) -> list:
+
+        linkTitles = list(self.linkedPages.keys())
+        if numLinks:
+            shortList = []
+            for x in range(0, numLinks-1):
+                shortList.append(linkTitles[x])
+            linkTitles = shortList
+
+        return linkTitles
 
     def getTitle(self) -> str:
         return self.title
@@ -83,22 +141,8 @@ class WikiNode:
         else:
             return self.wikipedia.summary(self.title)
 
-
     def getKeyWords(self):
-        text = self.getContent()
-        language = "en"
-        max_ngram_size = 5 # only 1-gram so that spacy can work
-        deduplication_threshold = 0.1# set to 0.1 to prohibit repeated words in key words
-        numOfKeywords = 30
-        extractor = yake.KeywordExtractor(lan=language,
-                                            n=max_ngram_size,
-                                            dedupLim=deduplication_threshold,
-                                            top=numOfKeywords,
-                                            features=None)
-        tuples = extractor.extract_keywords(text)
-        keywords = [i[0] for i in tuples]
-        self.keywords = keywords
-        return keywords
+        return self.keywords
 
     def getSectionTitles(self):
         return self.page.sections
@@ -113,23 +157,22 @@ class WikiNode:
             else:
                 return "Empty section"
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
 
-#     nlp = spacy.load('en_core_web_lg')
-#     s2v = nlp.add_pipe("sense2vec")
-#     s2v.from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
-#     wiki = MediaWiki()
-#     wiki.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone_qharring@macalester.edu' # MediaWiki etiquette
+    nlp = spacy.load('en_core_web_lg')
+    s2v = nlp.add_pipe("sense2vec")
+    s2v.from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
+    wiki = MediaWiki()
+    wiki.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone_qharring@macalester.edu' # MediaWiki etiquette
 
-#     test = WikiNode("Dinosaurs", nlp, wiki)
-#     print(test.getSummary())
+    test = WikiNode("Dinosaurs", nlp, wiki)
 
-#     print("LINKS")
-#     print(test.linkedPages)
+    print("KEYWORDS")
+    keywords = test.getKeyWords()
+    print(keywords)
 
-#     print("KEYWORDS")
-#     keywords = test.getKeyWords()
-#     print(keywords)
+    print("LINKS")
+    print(test.getLinkedPageTitles(20))
 
     # print("BOTH LINK AND KEYWORD")
     # print(set(test.linkedPages) & set(keywords))
