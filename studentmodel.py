@@ -36,8 +36,8 @@ class StudentModel:
     def getStudentName(self) -> str:
         return self.studentName
 
-    def getInterestKeywords(self) -> set:
-        return self.interestKeywords.keys()
+    def getInterestKeywords(self) -> list:
+        return list(self.interestKeywords.keys())
 
     def getFringe(self, numNodes) -> list:
         return self.explorationTracker.getFringe(numNodes)
