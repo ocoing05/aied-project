@@ -51,7 +51,7 @@ def runFreeLearnerMVP():
         adaptiveModel.updateInterest(currArticle, (1 - int(enjoyment)/5)) # not sure if this is exactly what we want, but for now keep it simple?
         
         print('Updating your interests... This may take a few minutes.')
-        adaptiveModel.update(currArticle) # update student model based on what they just read 
+        adaptiveModel.update(currArticle, mvp=False) # update student model based on what they just read 
 
 def createInterestList(str):
     return str.lower().split(',')

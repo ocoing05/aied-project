@@ -138,6 +138,8 @@ class ExplorationTracker(GraphTracker):
         for interest in list(studentInterests.keys()):
             timesUpdated, interestVal = studentInterests[interest]
             intDoc = self.nlp(interest)
+            if not intDoc.has_vector:
+                continue
             if self.hasS2V and len(intDoc) == 1 and len(nodeDoc) == 1:
                 totalSim += (nodeDoc._.s2v_phrases[0].s2v_similarity(intDoc._.s2v_phrases[0]) + 1) * 0.5 * interestVal
             else:

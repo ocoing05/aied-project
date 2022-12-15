@@ -26,7 +26,7 @@ class AdaptiveModel:
         # loading natural language processing pipeline, adding sense2vec for multiword noun phrase similarity analysis 
         nlp = spacy.load('en_core_web_lg')
         if Path("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg").is_dir():
-            print("Found s2v folder")
+            print("\tFound s2v folder")
             s2v = nlp.add_pipe("sense2vec")
             s2v.from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
         else:
@@ -42,8 +42,8 @@ class AdaptiveModel:
         return self.student.getFringe(num)
 
 
-    def update(self, node):
-        self.student.updateModel(node)
+    def update(self, node, mvp):
+        self.student.updateModel(node, mvp)
         # self.domainModel.updateModel(node)
 
     def updateInterest(self, node, interestVal):

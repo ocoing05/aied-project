@@ -9,7 +9,9 @@ This file: wikinode.py
     Uses NLP on content to determine key words, which are used by recommender system.
 """
 import yake
+import spacy
 from mediawiki import MediaWiki
+from sense2vec import Sense2Vec
 
 
 class WikiNode:
@@ -170,21 +172,77 @@ class WikiNode:
                 return "Empty section"
 
 if __name__ == "__main__":
-    pass
-    # nlp = spacy.load('en_core_web_lg')
-    # s2v = nlp.add_pipe("sense2vec")
-    # s2v.from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
-    # wiki = MediaWiki()
-    # wiki.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone_qharring@macalester.edu' # MediaWiki etiquette
 
-    # test = WikiNode("Dinosaurs", nlp, wiki)
+    nlp = spacy.load('en_core_web_lg')
+    s2vPipe = nlp.add_pipe("sense2vec")
+    s2vPipe.from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
+    s2v = Sense2Vec().from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
+    wiki = MediaWiki()
+    wiki.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone_qharring@macalester.edu' # MediaWiki etiquette
+
+    # testN1 = WikiNode("Dinosaurs", nlp, wiki)
+    # testN2
+    # testN3
+    # testN4
+    # testN5
+    # testN6
+
+    language = "en"
+    max_ngram_size = 1 # only 1-gram so that spacy can work
+    deduplication_threshold = 0.5 # set to 0.1 to prohibit repeated words in key words
+    numOfKeywords = 20
+    extractor = yake.KeywordExtractor(lan=language, n=max_ngram_size, dedupLim=deduplication_threshold, top=numOfKeywords, features=None)
+
+    title = wiki.suggest("posthumanism")
+    page = wiki.page(title)
+    pageDoc = nlp(title)
+    for token in pageDoc:
+        pageToken = token
+
+
+    print(title)
+    print("\n")
+    print("\nContent : " + page.content)
+    print("\n")
+    print("\nSummary : " + page.summary)
+    print("\n")
+
+    contentKWT = extractor.extract_keywords(page.content)
+    yakeKeyWords_FromPageContent = [i[0] for i in contentKWT]
+    summaryKWT = extractor.extract_keywords(page.summary)
+    yakeKeyWords_FromPageSummary = [i[0] for i in summaryKWT]
+    
+    print("\nContent Keywords")
+    [print(yakeKeyWords_FromPageContent[i]) for i in range(0, len(yakeKeyWords_FromPageContent))]
+
+    print("\n")
+
+    print("\nSummary Keywords")
+    [print(yakeKeyWords_FromPageSummary[i]) for i in range(0, len(yakeKeyWords_FromPageSummary))]
+
+    print("\n")
+
+    print("\nContent Keyword Spacy NLP Values (no sense2vec component)")
+    for kw in yakeKeyWords_FromPageContent:
+        kwDoc = nlp(kw)
+        for token in kwDoc:
+            print(token.similarity(pageToken))
+
+    print("\n")
+
+    print("\nSummary Keyword Spacy NLP Values (no sense2vec component)")
+
+    for kw in yakeKeyWords_FromPageSummary:
+        kwDoc = nlp(kw)
+        for token in kwDoc:
+            print(token.similarity(pageToken))
 
     # print("KEYWORDS")
-    # keywords = test.getKeyWords()
+    # keywords = testN1.getKeyWords()
     # print(keywords)
 
     # print("LINKS")
-    # print(test.getLinkedPageTitles(20))
+    # print(testN1.getLinkedPageTitles(20))
 
     # print("BOTH LINK AND KEYWORD")
     # print(set(test.linkedPages) & set(keywords))
@@ -194,3 +252,4 @@ if __name__ == "__main__":
 
     # print("CONTENTS OF SECTION TITLED: '", test.getSectionTitles()[0], "'")
     # print(test.getSection(test.getSectionTitles()[0]))
+    pass
