@@ -1,24 +1,35 @@
+"""
+COMP 484 - Introduction to Artificial Intelligence, Fall 2022
+Term Project - AI in Education: FreeLearner, presented 12/16/2022
+Ingrid O'Connor and Quentin Harrington
 
+This file: domainmodel.py
+    This file builds the student-specific domain graph, tracking
+    student explored nodes within wikipedia category hierarchy.
+    Guides article recommendations towards unexplored categories 
+    to bridge and expand student interests.
+"""
 
-import yake 
-from explorationtracker import DomainTracker
-from FoxQueue import PriorityQueue 
-from wikinode import WikiNode  
-from mediawiki import MediaWiki 
-from owlready2 import *
+from graphtracker import DomainTracker 
 
 class DomainModel:
     
     def __init__(self, nlp, wiki, initialInterests) -> None:
 
-        self.wikipedia = wiki
+        self.wiki = wiki
+        self.nlp = nlp
         self.domainTracker = DomainTracker(nlp, wiki, initialInterests)
+
+        print("domain initiated.")
 
     def updateModel(self, node):
         self.domainTracker.updateGraph(node)
 
 if __name__ == "__main__":
     pass
+
+    # Pseudocode for building wikipedia noncyclic domain knowledge graph
+    # ------------------------------------------------------------------
     # 1 Function Iterate(A) :
         # 2 Find page id pd, title t, page namespace pn of page A;
         # 3 if pn == 0 thencscs
@@ -42,11 +53,4 @@ if __name__ == "__main__":
             # 21 end
         # 22 end
     # 23 end  
-
-    # wikipedia = MediaWiki() 
-
-    # onto = get_ontology("file:///Users/quentinharrington/Desktop/COMP484/aied-project/wiki_cats_full_non_cyclic_v1.owl")
-    # onto.load()
-    # ontoList = list(onto.classes())
-    # print(ontoList)
 

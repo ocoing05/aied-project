@@ -1,4 +1,17 @@
-from explorationtracker import ExplorationTracker
+"""
+COMP 484 - Introduction to Artificial Intelligence, Fall 2022
+Term Project - AI in Education: FreeLearner, presented 12/16/2022
+Ingrid O'Connor and Quentin Harrington
+
+This file: studentmodel.py
+    Holds and updates all information about the student; includes:
+        interestKeywords dictionary
+        explorationTracker graphtracker
+            explored (networkx graph) - nodes visited
+            fringe (FoxQueue priority queue) - links to visited nodes, sorted by expected interest
+"""
+
+from graphtracker import ExplorationTracker
 
 class StudentModel:
 
@@ -21,16 +34,24 @@ class StudentModel:
 
         # explorationTracker contains explored graph and fringe queue
         self.explorationTracker = ExplorationTracker(nlp, wiki, interestKeywords)
-        self.nlp = nlp
-        self.newWords = [] # List of words identified by the student as unknown, or that they are unsure of the meaning
 
+        # set NLP and check if sense2vec is in pipeline
+        self.nlp = nlp
+        self.hasS2V = True
+        try:
+            nlp("test")._.in_s2v
+        except AttributeError:
+            self.hasS2V = False
+        
         # NOT FULLY IMPLEMENTED...
         self.username = username # self-selected unique student identifier
         self.password = password # protecting account usage
         self.email = email # for resetting password
+        self.newWords = [] # List of words identified by the student as unknown, or that they are unsure of the meaning
         currentSession = None 
         statsBySession = [] # List of sessionStats objects, helps build progress reports for students and teachers
 
+        print("student initiated.")
         ###
 
     def getStudentName(self) -> str:
@@ -39,7 +60,7 @@ class StudentModel:
     def getInterestKeywords(self) -> list:
         return list(self.interestKeywords.keys())
 
-    def getFringe(self, numNodes) -> list:
+    def getFringe(self, numNodes=None) -> list:
         return self.explorationTracker.getFringe(numNodes)
 
     def updateModel(self, node, mvp) -> None:
@@ -86,7 +107,7 @@ class StudentModel:
         
         return self.calcSimilarity(nodeDoc, interestDict)
 
-    def calcSimilarity(nodeDoc, interestDict) -> tuple:
+    def calcSimilarity(self, nodeDoc, interestDict) -> tuple:
         """Given a nodeTitle spacy doc and a keyword interest dictionary {keywordSpacyDoc: keywordInterestVal},
         Return a tuple (x, y):
             x = the expected interest level (0-high, 1-low) of the node
@@ -95,14 +116,14 @@ class StudentModel:
         nodeSimDict = {}
         totalSim = 0
         for intDoc in interestDict.keys():
-            if len(nodeDoc) != 1 or len(intDoc) != 1:
-                # adds the standard spacy similarity between link and keyword to totalSim
-                sim = ((nodeDoc.similarity(intDoc) + 1) * 0.5) * interestDict.get(intDoc)
-    
-            else:
+            if self.hasS2V and len(nodeDoc) == 1 or len(intDoc) == 1:
                 # adds the sense2vec similarity between the link token and the keyword token,
                 # if both in sense2vec vocabulary.
-                sim = ((nodeDoc._.s2v_phrases[0]._.s2v_similarity(intDoc._.s2v_phrases[0]) + 1) * 0.5) * interestDict.get(intDoc)
+                sim = ((nodeDoc._.s2v_phrases[0]._.s2v_similarity(intDoc._.s2v_phrases[0]) + 1) * 0.5) * interestDict.get(intDoc) 
+    
+            else:
+                # adds the standard spacy similarity between link and keyword to totalSim
+                sim = ((nodeDoc.similarity(intDoc) + 1) * 0.5) * interestDict.get(intDoc)
             nodeSimDict[intDoc] = sim
             totalSim += sim   
 

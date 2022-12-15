@@ -1,3 +1,25 @@
+"""
+COMP 484 - Introduction to Artificial Intelligence, Fall 2022
+Term Project - AI in Education: FreeLearner, presented 12/16/2022
+Ingrid O'Connor and Quentin Harrington
+
+This file: graphtracker.py
+    This file contains a class GraphTracker, a parent (base) class for two separate trackers:
+
+        1. ExplorationTracker --> created by Student Model, holds two main objects:
+            a. graph --> networkx.Graph()
+                --> non-hierarchical graph of explored nodes, and edges representing students path
+            b. fringe --> PriorityQueue() --> from FoxQueue.py by Susan Fox    
+                --> Priority queue of links to nodes in the explored graph, sorted by expected interest 
+                based on a similarity analysis to studentInterests
+
+        2. DomainTracker --> created by Domain Model, holds one object:
+            a. graph --> networkx.Graph()
+                --> heirarchical category graph encompassing all parent, sibling, and children nodes of
+                explored nodes
+                
+"""
+
 import networkx as nx
 import spacy
 import re
@@ -8,15 +30,20 @@ from FoxQueue import PriorityQueue
 from wikinode import WikiNode 
 from mediawiki import MediaWiki
 
-# load nlp and add sense2vec multiword phrase vector pipe
-
 class GraphTracker():
 
-    def __init__(self, nlp) -> None:
+    def __init__(self, nlp, wiki) -> None:
 
-        self.nlp = nlp # natural language processor 
         self.graph = nx.Graph() # graph of already read articles and edges between them represent from what link they were discovered
-        self.fringe = PriorityQueue() # unopened WikiNodes adjacent to progressGraph, sorted by potential interest
+        self.nlp = nlp # natural language processor 
+        self.wiki = wiki # MediaWiki() wikipedia api object
+
+        # Check if sense2vec is in pipeline
+        self.hasS2V = True
+        try:
+            nlp("test")._.in_s2v
+        except AttributeError:
+            self.hasS2V = False
 
     def alreadyExplored(self, title):
         if title in list(self.graph.nodes):
@@ -24,44 +51,25 @@ class GraphTracker():
         else:
             return False
 
-    def getFringe(self, numNodes) -> list:
-
-        fringeList = []
-        tempFringeQueue = copy.deepcopy(self.fringe) # needs to be copy not ref
-        for x in range(numNodes):
-            node = tempFringeQueue.delete()
-            if node is not None:
-                fringeList.append(node)
-
-        return fringeList
-
-    def shortenFringe(self, num) -> None:
-        '''Deletes num nodes from the end of the queue.'''
-        fringeItems = self.getFringe(self.fringe.size)
-        keep = self.fringe.size - num # number of nodes to keep
-        for i in range(self.fringe.size):
-            if i > keep:
-                self.fringe.removeValue(fringeItems[i])
-
-
-class ExplorationTracker(GraphTracker):
-
-    def __init__(self, nlp, wiki, initialInterests) -> None:
-
-        super().__init__(nlp)
-        self.wiki = wiki
-        for i in initialInterests:
-            try:
-                self.fringe.insert(WikiNode(i, nlp, wiki), 0.0) 
-            except: # don't add this interest if MediaWiki can't identify the correct article to use
-                continue
-
     def updateGraph(self, node):
         '''Called by the student model update() method after a student reads a new article. 
         Adds node to graph.'''
         self.graph.add_node(node.title)
         if node.prevNode:
             self.graph.add_edge(node.title, node.prevNode)
+
+class ExplorationTracker(GraphTracker):
+
+    def __init__(self, nlp, wiki, initialInterests) -> None:
+
+        super().__init__(nlp, wiki)
+        self.fringe = PriorityQueue() # unopened WikiNodes adjacent to progressGraph, sorted by potential interest
+
+        for i in initialInterests:
+            try:
+                self.fringe.insert(WikiNode(i, nlp, wiki), 0.0) 
+            except: # don't add this interest if MediaWiki can't identify the correct article to use
+                continue
 
     def updateFringe(self, node, studentInterests, mvp):
         '''Called by the student model update() method after a student reads a new article.
@@ -94,9 +102,29 @@ class ExplorationTracker(GraphTracker):
             if priority == -1: 
                 continue # ignore if does not exist in spacy nlp model
             # print(priority)
-
-            print(pg, priority)
+            # print(pg, priority)
             self.fringe.insert(WikiNode(pg, self.nlp, self.wiki, prevNode = node), priority)
+
+    def getFringe(self, numNodes=None) -> list:
+        """Returns list of fringe nodes, numNodes long, or all if numNodes is not provided."""
+        if not numNodes:
+            numNodes = self.fringe.getSize()
+        fringeList = []
+        tempFringeQueue = copy.deepcopy(self.fringe) # needs to be copy not ref
+        for x in range(numNodes):
+            node = tempFringeQueue.delete()
+            if node is not None:
+                fringeList.append(node)
+
+        return fringeList
+
+    def shortenFringe(self, num) -> None:
+        '''Deletes num nodes from the end of the queue.'''
+        fringeItems = self.getFringe(self.fringe.size)
+        keep = self.fringe.size - num # number of nodes to keep
+        for i in range(self.fringe.size):
+            if i > keep:
+                self.fringe.removeValue(fringeItems[i])
 
     def getPriority(self, nodeTitle, studentInterests) -> float:
         """Param:
@@ -110,7 +138,7 @@ class ExplorationTracker(GraphTracker):
         for interest in list(studentInterests.keys()):
             timesUpdated, interestVal = studentInterests[interest]
             intDoc = self.nlp(interest)
-            if len(intDoc) == 1 and len(nodeDoc) == 1:
+            if self.hasS2V and len(intDoc) == 1 and len(nodeDoc) == 1:
                 totalSim += (nodeDoc._.s2v_phrases[0].s2v_similarity(intDoc._.s2v_phrases[0]) + 1) * 0.5 * interestVal
             else:
                 totalSim += (nodeDoc.similarity(intDoc) + 1) * 0.5 * interestVal
@@ -137,9 +165,10 @@ class ExplorationTracker(GraphTracker):
         '''Updates priority values of existing fringe nodes based on updated student interests.'''
         # TODO: still need to test this once logic is working (mainly to make sure each is what i think it is)
         # should be called in updateFringe() after shortenFringe()
-        for each in self.fringe:
-            print(each) # TODO: delete after testing
-            node = each[0]
+        tempFringe = self.fringe
+        for node in tempFringe:
+            #print(each) # TODO: delete after testing
+            
             newPriority = self.getPriority(node.getTitle(), studentInterests)
             self.fringe.update(node, newPriority)
 
@@ -147,32 +176,30 @@ class DomainTracker(GraphTracker):
 
     def __init__(self, nlp, wiki, initialInterests) -> None:
 
-        super().__init__(nlp)
-
-        self.wikipedia = wiki
+        super().__init__(nlp, wiki)
         self.initGraph(initialInterests)
         
     def initGraph(self, initialInterests):
         for i in initialInterests:
-            node = WikiNode(i, self.nlp, self.wikipedia, domainNode=True)
+            node = WikiNode(i, self.nlp, self.wiki, domainNode=True)
             self.updateGraph(node)
-            catTree = self.wikipedia.categorytree(node.getTitle, 1)
+            catTree = self.wiki.categorytree(node.getTitle, 1)
             catDict = catTree['category']
             subCatsDict = catDict['sub-categories']
             for subCat in subCatsDict:
-                subCatNode = WikiNode(subCat, self.nlp, self.wikipedia, prevNode=node, domainNode=True)
+                subCatNode = WikiNode(subCat, self.nlp, self.wiki, prevNode=node, domainNode=True)
                 self.updateGraph(subCatNode)
                 # subCatDict = catTree['category']['sub-categories'][subCat]
                 # node.getKeyWords()
             parentCatsList = catDict['parent-categories']
             sortedParentCats = {}
             for parentCat in parentCatsList:
-                parentNode = WikiNode(parentCat, self.nlp, self.wikipedia, domainNode=True)
+                parentNode = WikiNode(parentCat, self.nlp, self.wiki, domainNode=True)
                 parentDoc = self.nlp(parentCat)
                 totalSim = 0
                 for kw in node.getKeyWords():
                     kwDoc = self.nlp(kw)
-                    if len(parentDoc) == 1 and len(kwDoc) == 1:
+                    if self.hasS2V and len(parentDoc) == 1 and len(kwDoc) == 1:
                         totalSim += parentDoc._.s2v_phrases[0]._.s2v_similarity(kwDoc._.s2v_phrases[0])
                     else:
                         totalSim += parentDoc.similarity(kwDoc)

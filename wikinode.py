@@ -1,11 +1,14 @@
 """
-Represents a node in the graph of Wikipedia articles.
-Includes title, url, summary, categories, linked pages, and content of page.
-Uses NLP on content to determine key words, which are used by recommender system.
+COMP 484 - Introduction to Artificial Intelligence, Fall 2022
+Term Project - AI in Education: FreeLearner, presented 12/16/2022
+Ingrid O'Connor and Quentin Harrington
+
+This file: wikinode.py
+    Represents a node in the graph of Wikipedia articles.
+    Includes title, url, summary, categories, linked pages, and content of page.
+    Uses NLP on content to determine key words, which are used by recommender system.
 """
 import yake
-from sense2vec import Sense2Vec
-import spacy
 from mediawiki import MediaWiki
 
 
@@ -22,6 +25,7 @@ class WikiNode:
         self.domainNode = domainNode # If node is in domain model
         self.wikipedia = wiki
         self.nlp = nlp
+        self.hasS2V = True
 
         # From given title, find most appropriate wikipedia page
         suggestedTitle = self.wikipedia.suggest(title)
@@ -30,11 +34,17 @@ class WikiNode:
             self.page = self.wikipedia.page(suggestedTitle)
             self.title = suggestedTitle
 
+        # Check if sense2vec is in pipeline
+        try:
+            nlp("test")._.in_s2v
+        except AttributeError:
+            self.hasS2V = False
+
         # Extract and set top 30 keywords with yake, sort links by similarity to keywords
         # -------------------------------------------------------------------------------
         text = self.getContent()
         language = "en"
-        max_ngram_size = 3 # only 1-gram so that spacy can work
+        max_ngram_size = 1 # only 1-gram so that spacy can work
         deduplication_threshold = 0.5 # set to 0.1 to prohibit repeated words in key words
         numOfKeywords = 50
         extractor = yake.KeywordExtractor(lan=language,
@@ -59,6 +69,8 @@ class WikiNode:
             # with high maxVal of (titleSim, keywordSim, linksSim) "wormholes" to other domains.
             # Find knownPeers by running s2v_most_similar on title, keep 
             self.knownPeers = [] 
+        
+        print("node initiated.")
 
     def sortKeywords(self):
         nodeDoc = self.nlp(self.title)
@@ -68,7 +80,7 @@ class WikiNode:
             if not kwDoc.has_vector:
                 continue
             
-            if nodeDoc[0:]._.in_s2v and kwDoc[0:]._.in_s2v:
+            if self.hasS2V and nodeDoc[0:]._.in_s2v and kwDoc[0:]._.in_s2v:
                 # adds the sense2vec similarity between the link token and the keyword token if both in sense2vec vocabulary
                 kwDict.update({kw:nodeDoc[0:]._.s2v_similarity(kwDoc[0:])})
             else:
@@ -93,7 +105,7 @@ class WikiNode:
                 if not kwDoc.has_vector:
                     continue
                 # print("\tKeyword: ", kwDoc)
-                if linkDoc[0:]._.in_s2v and kwDoc[0:]._.in_s2v:
+                if self.hasS2V and linkDoc[0:]._.in_s2v and kwDoc[0:]._.in_s2v:
                     # adds the sense2vec similarity between the link token and the keyword token if both in sense2vec vocabulary
                     sim = linkDoc[0:]._.s2v_similarity(kwDoc[0:])
                     # print("\tSimilarity: ", sim)
@@ -158,21 +170,21 @@ class WikiNode:
                 return "Empty section"
 
 if __name__ == "__main__":
+    pass
+    # nlp = spacy.load('en_core_web_lg')
+    # s2v = nlp.add_pipe("sense2vec")
+    # s2v.from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
+    # wiki = MediaWiki()
+    # wiki.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone_qharring@macalester.edu' # MediaWiki etiquette
 
-    nlp = spacy.load('en_core_web_lg')
-    s2v = nlp.add_pipe("sense2vec")
-    s2v.from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
-    wiki = MediaWiki()
-    wiki.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone_qharring@macalester.edu' # MediaWiki etiquette
+    # test = WikiNode("Dinosaurs", nlp, wiki)
 
-    test = WikiNode("Dinosaurs", nlp, wiki)
+    # print("KEYWORDS")
+    # keywords = test.getKeyWords()
+    # print(keywords)
 
-    print("KEYWORDS")
-    keywords = test.getKeyWords()
-    print(keywords)
-
-    print("LINKS")
-    print(test.getLinkedPageTitles(20))
+    # print("LINKS")
+    # print(test.getLinkedPageTitles(20))
 
     # print("BOTH LINK AND KEYWORD")
     # print(set(test.linkedPages) & set(keywords))

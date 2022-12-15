@@ -1,49 +1,60 @@
-from studentmodel import StudentModel  
-from wikinode import WikiNode 
-from explorationtracker import ExplorationTracker
+"""
+COMP 484 - Introduction to Artificial Intelligence, Fall 2022
+Term Project - AI in Education: FreeLearner, presented 12/16/2022
+Ingrid O'Connor and Quentin Harrington
+
+This file: freelearnerTests.py
+    This file tests all of the classes and methods for freelearner.
+"""
+
 from mediawiki import MediaWiki
 import spacy
 from sense2vec import Sense2Vec, Sense2VecComponent
 import yake
+from pathlib import Path
+
+from studentmodel import StudentModel  
+from wikinode import WikiNode 
+from graphtracker import ExplorationTracker 
+from adaptivemodel import AdaptiveModel
 
 # *** MOCK DATA ***
 
 # Domain and NLP objects
-    # create Spacy natural language processor, 
-    # add sense2vec pipe for multiword phrase similarity accuracy
-nlp = spacy.load('en_core_web_lg')
-s2v = nlp.add_pipe("sense2vec")
-s2v.from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
-    # create MediaWiki() object and setting user_agent following mediawiki etiquette
-wiki = MediaWiki()
-wiki.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone_qharring@macalester.edu' # MediaWiki etiquette
+# create Spacy natural language processor, 
+# add sense2vec pipe for multiword phrase similarity accuracy
+# nlp = spacy.load('en_core_web_lg')
+# if Path("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg").is_dir():
+#     print("Found s2v folder")
+#     s2v = nlp.add_pipe("sense2vec")
+#     s2v.from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
+# else:
+#     print("sense2vec pre-trained model not found. Continuing without improved similarity measure.")
+# # create MediaWiki() object and setting user_agent following mediawiki etiquette
+# wiki = MediaWiki()
+# wiki.user_agent = 'macalester_comp484_quentin_ingrid_AI_capstone_qharring@macalester.edu' # MediaWiki etiquette
 
 # create students
-student1 = StudentModel("Ingrid", 
-                        ["Disney", "Dinosaurs", "Volcanoes"],
-                        nlp,
-                        username="ingrid", 
-                        password="12345", 
-                        email="ioconnor@macalester.edu")
-studentQ = StudentModel("Quentin Harrington", 
-                        ["Computers", "Sustainability", "Ecology", "Soccer", "Urbanism", "Architecture", "Plants", "Psychology"],
-                        nlp)
-student3 = StudentModel("student3", 
-                        ["Rainbows", "Dragons", "Hippopotamus", "Japan", "Fruit", "Baking", "Photography", "Hiking", "Kayaking"],  
-                        nlp)
-
+# student1 = StudentModel("Ingrid", ["Disney", "Dinosaurs", "Volcanoes"], nlp, wiki)
+# student2 = StudentModel("Quentin Harrington", ["Computers", "Sustainability", "Ecology", "Soccer", "Urbanism", "Architecture", "Plants", "Psychology"], nlp, wiki)
+# student3 = StudentModel("student3",["Rainbows", "Dragons", "Hippopotamus", "Japan", "Fruit", "Baking", "Photography", "Hiking", "Kayaking"], nlp, wiki)
 
 # create articles
-article1 = WikiNode("Disney", nlp, wiki)
-article2 = WikiNode("Penguins", nlp, wiki)
-article3 = WikiNode("Volcanoes", nlp, wiki)
-article4 = WikiNode("Egyptian pyramids", nlp, wiki)
-article5 = WikiNode("Wolfgang Amadeus Mozart", nlp, wiki)
-# when creating new nodes, if the node was added from the fringe by being linked from a previous article it would be created like this:
-article6 = WikiNode("Mickey Mouse", nlp, wiki, prevNode=article1)
+# article1 = WikiNode("Disney", nlp, wiki)
+# article2 = WikiNode("Penguins", nlp, wiki)
+# article3 = WikiNode("Volcanoes", nlp, wiki)
+# article4 = WikiNode("Egyptian pyramids", nlp, wiki)
+# article5 = WikiNode("Wolfgang Amadeus Mozart", nlp, wiki)
+# # when creating new nodes, if the node was added from the fringe by being linked from a previous article it would be created like this:
+# article6 = WikiNode("Mickey Mouse", nlp, wiki, prevNode=article1)
 
 # *** TEST DEFINITIONS ***
 
+def testAdaptiveModel():
+    studentName = "Ingrid"
+    adaptiveModel = AdaptiveModel(studentName, ["Disney", "Dinosaurs", "Volcanoes"])
+    assert adaptiveModel.toString() == studentName
+    
 # *** WikiNode ***
 def testWikiNodes():
     testSections()
@@ -77,7 +88,7 @@ def testStudentModel():
     # TODO: student creation, fringe updates, student interest updates, session stats
 
 def testStudentCreation():
-    student2 = StudentModel("test", ["Dogs", "Dinosaurs", "Volcanoes", "Disney"], nlp)
+    student2 = StudentModel("test", ["Dogs", "Dinosaurs", "Volcanoes", "Disney"], nlp, wiki)
     assert student2.getStudentName() == 'test'
     assert 'dogs' in student2.getInterestKeywords()
     assert 'volcanoes' in student2.getInterestKeywords()
@@ -369,10 +380,10 @@ def testMediaWiki():
  
 # *** RUN TESTS ***
 if __name__ == "__main__":
-
-    testWikiNodes()
-    testStudentModel()
-    testExplorationTracker()
+    testAdaptiveModel()
+    # testWikiNodes()
+    # testStudentModel()
+    # testExplorationTracker()
     # testRecommender()
     # testUI()
     # testUpdatePriorities()

@@ -1,6 +1,12 @@
-'''
-Runs MVP of FreeLearner
-'''
+"""
+COMP 484 - Introduction to Artificial Intelligence, Fall 2022
+Term Project - AI in Education: FreeLearner, presented 12/16/2022
+Ingrid O'Connor and Quentin Harrington
+
+This file: freelearner.py
+    This file implements a simple user interface in terminal,
+    Passes and receives data through adaptive model.
+"""
 
 from adaptivemodel import AdaptiveModel
 
@@ -16,7 +22,7 @@ def runFreeLearnerMVP():
         cmd = input('Type n to get a new suggestion or q to quit FreeLearner: ')
         if cmd == 'q':
             break
-        suggestions = adaptiveModel.getArticles()
+        suggestions = adaptiveModel.getArticles(4)
         if len(suggestions) == 0:
             print("No suggestions.")
             break
