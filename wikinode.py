@@ -44,21 +44,24 @@ class WikiNode:
 
         # Extract and set top 30 keywords with yake, sort links by similarity to keywords
         # -------------------------------------------------------------------------------
-        text = self.getContent()
-        language = "en"
-        max_ngram_size = 1 # only 1-gram so that spacy can work
-        deduplication_threshold = 0.5 # set to 0.1 to prohibit repeated words in key words
-        numOfKeywords = 50
-        extractor = yake.KeywordExtractor(lan=language,
-                                            n=max_ngram_size,
-                                            dedupLim=deduplication_threshold,
-                                            top=numOfKeywords,
-                                            features=None)
-        tuples = extractor.extract_keywords(text)
-        keywords = [i[0] for i in tuples]
-        self.keywords = keywords
-        self.sortKeywords()
-        self.linkedPages = self._sortLinks(self.page.links) # Dictionary of links (keys) sorted by highest avg similarity to self.keywords
+        # text = self.getContent()
+        # language = "en"
+        # max_ngram_size = 1 # only 1-gram so that spacy can work
+        # deduplication_threshold = 0.5 # set to 0.1 to prohibit repeated words in key words
+        # numOfKeywords = 50
+        # extractor = yake.KeywordExtractor(lan=language,
+        #                                     n=max_ngram_size,
+        #                                     dedupLim=deduplication_threshold,
+        #                                     top=numOfKeywords,
+        #                                     features=None)
+        # tuples = extractor.extract_keywords(text)
+        # keywords = [i[0] for i in tuples]
+        # self.keywords = keywords
+        # self.sortKeywords()
+        # self.linkedPages = self._sortLinks(self.page.links) # Dictionary of links (keys) sorted by highest avg similarity to self.keywords
+        # FOR MVP: 
+        # TODO: add mvp conditional... is sortKeywords() still needed at all
+        self.linkedPages = self.page.links
         # -------------------------------------------------------------------------------        
 
         # If wikiNode is in the domain model, set domain hierarchy details
@@ -123,6 +126,8 @@ class WikiNode:
         return dict(sorted(linksPrio.items(), key=lambda x:x[1], reverse=True))
 
     def getLinkedPageTitles(self, numLinks=None) -> list:
+        # FOR MVP: # TODO: add mvp conditional 
+        return self.linkedPages
 
         linkTitles = list(self.linkedPages.keys())
         if numLinks:
