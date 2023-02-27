@@ -74,11 +74,14 @@ class ExplorationTracker(GraphTracker):
     def updateFringe(self, node, studentInterests, mvp):
         '''Called by the student model update() method after a student reads a new article.
         Updates fringe with linked articles from node they just read. Ranked based on student interests.'''
-        if self.fringe.size > 30:
-            self.shortenFringe(self.fringe.size / 2) # cut fringe size in half
+        # if self.fringe.size > 30: # to reimplement, would need to use new deleteFromFringe() function
+        #     self.shortenFringe(self.fringe.size / 2) # cut fringe size in half
         linkedPageTitles = node.getLinkedPageTitles() # links are sorted by similarity to node keywords
-        if self.fringe.contains(node):
-            self.fringe.removeValue(node)
+        self.deleteFromFringe(node.title)
+        # if self.fringe.contains(node):
+        #     print("removing node")
+        #     # self.fringe.removeValue(node)
+        #     print("done")
         # for pg in set(lp) & set(kw): # words that exist as both linked pages and key words of the node
         # TODO: instead of using the set of both ^ like above, maybe use keywords to rank linked pages but don't disregard completely?
         # maybe something like that ^ but use similarity between kw and lp? prioritize the ones where similarity is greatest
@@ -173,6 +176,14 @@ class ExplorationTracker(GraphTracker):
             
             newPriority = self.getPriority(node.getTitle(), studentInterests)
             self.fringe.update(node, newPriority)
+
+    def deleteFromFringe(self, title):
+        success = False
+        for [v,p] in self.fringe.qData:
+            if v.title == title:
+                self.fringe.removeValue(v)
+                success = True
+        return success
 
 class DomainTracker(GraphTracker):
 
