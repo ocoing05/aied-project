@@ -178,6 +178,10 @@ class WikiNode:
 
 if __name__ == "__main__":
 
+    #   1. Load:
+    #       - spacy natural language processor object
+    #       - sense2vec pipe object (for spacy pipeline) 
+    #       - mediawiki MediaWiki wikipedia object (wikipedia is default)
     nlp = spacy.load('en_core_web_lg')
     s2vPipe = nlp.add_pipe("sense2vec")
     s2vPipe.from_disk("/Users/quentinharrington/Desktop/COMP484/aied-project/s2v_reddit_2019_lg")
@@ -192,43 +196,59 @@ if __name__ == "__main__":
     # testN5
     # testN6
 
+
+    #   2. Build yake keyword extractor object
     language = "en"
     max_ngram_size = 1 # only 1-gram so that spacy can work
     deduplication_threshold = 0.5 # set to 0.1 to prohibit repeated words in key words
     numOfKeywords = 20
     extractor = yake.KeywordExtractor(lan=language, n=max_ngram_size, dedupLim=deduplication_threshold, top=numOfKeywords, features=None)
 
+    #   3. Test MediaWiki and Spacy:
+    #       - Get page from MediaWiki object
+    #       - Make spacy nlp 'doc' of page title
+    #       - Set last token in title as pageToken
+    #       - Print 
     title = wiki.suggest("posthumanism")
     page = wiki.page(title)
     pageDoc = nlp(title)
     for token in pageDoc:
         pageToken = token
 
-
-    print(title)
+    print("Title : " + title + ",    pageToken : " + pageToken.text)
     print("\n")
     print("\nContent : " + page.content)
     print("\n")
     print("\nSummary : " + page.summary)
     print("\n")
 
+    #   4. Extract keywords from content and summary with yake extractor, Print with spacy similarity val
     contentKWT = extractor.extract_keywords(page.content)
-    yakeKeyWords_FromPageContent = [i[0] for i in contentKWT]
+    yakeKeyWords_FromContent = [i[0] for i in contentKWT]
     summaryKWT = extractor.extract_keywords(page.summary)
-    yakeKeyWords_FromPageSummary = [i[0] for i in summaryKWT]
+    yakeKeyWords_FromSummary = [i[0] for i in summaryKWT]
     
-    print("\nContent Keywords")
-    [print(yakeKeyWords_FromPageContent[i]) for i in range(0, len(yakeKeyWords_FromPageContent))]
+    print("\nContent Keywords : Spacy Similarity Values : S2V Similarity Values")
+    for i in range(0, len(yakeKeyWords_FromContent)):
+        kw = yakeKeyWords_FromContent[i]
+        kwDoc = nlp(kw)
+        sim = kwDoc[0].similarity(pageToken)
+        print(kw + "   " + sim)
 
     print("\n")
 
-    print("\nSummary Keywords")
-    [print(yakeKeyWords_FromPageSummary[i]) for i in range(0, len(yakeKeyWords_FromPageSummary))]
+    print("\nSummary Keywords : Spacy Similarity Values : S2V Similarity Values")
+    for i in range(0, len(yakeKeyWords_FromContent)):
+        kw = yakeKeyWords_FromContent[i]
+        kwDoc = nlp(kw)
+        sim = kwDoc[0].similarity(pageToken)
+        print(kw + "   " + sim)
+    [print(yakeKeyWords_FromSummary[i]) for i in range(0, len(yakeKeyWords_FromSummary))]
 
     print("\n")
 
     print("\nContent Keyword Spacy NLP Values (no sense2vec component)")
-    for kw in yakeKeyWords_FromPageContent:
+    for kw in yakeKeyWords_FromContent:
         kwDoc = nlp(kw)
         for token in kwDoc:
             print(token.similarity(pageToken))
@@ -237,7 +257,7 @@ if __name__ == "__main__":
 
     print("\nSummary Keyword Spacy NLP Values (no sense2vec component)")
 
-    for kw in yakeKeyWords_FromPageSummary:
+    for kw in yakeKeyWords_FromSummary:
         kwDoc = nlp(kw)
         for token in kwDoc:
             print(token.similarity(pageToken))
